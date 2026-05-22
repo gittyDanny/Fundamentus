@@ -248,9 +248,13 @@ def show_latest_prices(ticker, limit=5):
     for row in rows:
         date, open_price, high, low, close, volume = row
         print(
-            f"- {date}: "
-            f"Open {open_price}, High {high}, Low {low}, Close {close}, Volume {volume}"
-        )
+                f"- {date}: "
+                f"Open {open_price:.2f}, "
+                f"High {high:.2f}, "
+                f"Low {low:.2f}, "
+                f"Close {close:.2f}, "
+                f"Volume {volume}"
+                )
 
 
 def main():
@@ -278,7 +282,7 @@ def main():
 
     print("\nFundamentus wurde erfolgreich ausgeführt.")
     print(f"{len(assets)} Assets aus der Watchlist verarbeitet.")
-    print(f"{len(prices)} Kurszeilen für {ticker} von Stooq geladen.")
+    print(f"{len(prices)} Kurszeilen für {ticker} von Yahoo geladen.")
     print(f"{new_rows} neue Kurszeilen gespeichert.")
 
 
