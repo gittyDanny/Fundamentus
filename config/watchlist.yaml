@@ -1,0 +1,56 @@
+assets:
+  - ticker: TSLA
+    name: Tesla
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Consumer Cyclical
+
+  - ticker: NVDA
+    name: Nvidia
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: PLTR
+    name: Palantir
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: AMD
+    name: Advanced Micro Devices
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: SIE.DE
+    name: Siemens
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Industrials
+
+  - ticker: ENR.DE
+    name: Siemens Energy
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Energy
+
+  - ticker: RHM.DE
+    name: Rheinmetall
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Industrials
+
+  - ticker: SAP.DE
+    name: SAP
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Technology
