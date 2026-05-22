@@ -53,4 +53,29 @@ def show_latest_prices(ticker, limit=5):
             f"Close {close:.2f}, "
             f"Volume {volume}"
         )
-        
+
+
+def show_fundamentals(ticker):
+    # hier zeigen wir die gespeicherten Fundamentaldaten eines Tickers
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT fiscal_year, metric, value, unit
+    FROM fundamentals
+    WHERE ticker = ?
+    ORDER BY fiscal_year DESC, metric ASC;
+    """, (ticker,))
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    print(f"\nFundamentaldaten für {ticker}:")
+
+    if not rows:
+        print("- Noch keine Fundamentaldaten gespeichert.")
+        return
+
+    for row in rows:
+        fiscal_year, metric, value, unit = row
+        print(f"- {fiscal_year} | {metric}: {value:,.0f} {unit}")

@@ -3,21 +3,29 @@ from app.database import get_connection
 
 def save_asset(asset):
     # hier speichern wir ein einzelnes Asset aus der Watchlist
-    # INSERT OR IGNORE verhindert doppelte Ticker in der Datenbank
+    # wenn der Ticker schon existiert, aktualisieren wir die Stammdaten
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT OR IGNORE INTO assets
-    (ticker, name, asset_type, region, currency, sector)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO assets
+    (ticker, name, asset_type, region, currency, sector, cik)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(ticker) DO UPDATE SET
+        name = excluded.name,
+        asset_type = excluded.asset_type,
+        region = excluded.region,
+        currency = excluded.currency,
+        sector = excluded.sector,
+        cik = excluded.cik
     """, (
         asset["ticker"],
         asset.get("name"),
         asset.get("asset_type"),
         asset.get("region"),
         asset.get("currency"),
-        asset.get("sector")
+        asset.get("sector"),
+        asset.get("cik")
     ))
 
     conn.commit()

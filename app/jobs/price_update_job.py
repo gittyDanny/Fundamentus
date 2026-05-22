@@ -31,7 +31,7 @@ def update_daily_prices_for_assets(assets):
 
         except Exception as error:
             # hier fangen wir Fehler pro Ticker ab,
-            # damit nicht die ganze Aktualisierung stirbt, nur weil ein Ticker Probleme macht
+            # damit nicht die ganze Aktualisierung stirbt
             result = {
                 "ticker": ticker,
                 "loaded_rows": 0,

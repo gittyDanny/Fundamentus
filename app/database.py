@@ -29,9 +29,19 @@ def init_db():
         region TEXT,
         currency TEXT,
         sector TEXT,
+        cik TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
     """)
+
+    try:
+        # hier ergänzen wir die CIK-Spalte für ältere Datenbanken,
+        # die schon vor dem SEC-Import erstellt wurden
+        cursor.execute("ALTER TABLE assets ADD COLUMN cik TEXT;")
+    except sqlite3.OperationalError:
+        # hier landen wir, wenn die Spalte schon existiert
+        # das ist okay, weil wir main.py mehrfach starten wollen
+        pass
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS price_daily (
@@ -46,6 +56,24 @@ def init_db():
         source TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(ticker, date, source)
+    );
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS fundamentals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ticker TEXT NOT NULL,
+        fiscal_year INTEGER,
+        period TEXT,
+        metric TEXT NOT NULL,
+        value REAL,
+        unit TEXT,
+        source TEXT,
+        form TEXT,
+        filed_at TEXT,
+        end_date TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(ticker, fiscal_year, period, metric, source)
     );
     """)
 

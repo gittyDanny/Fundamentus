@@ -5,6 +5,7 @@ assets:
     region: US
     currency: USD
     sector: Consumer Cyclical
+    cik: "0001318605"
 
   - ticker: NVDA
     name: Nvidia
