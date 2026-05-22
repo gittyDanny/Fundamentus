@@ -1,5 +1,8 @@
 from app.database import get_connection
-from app.analysis.fundamental_metrics import calculate_fundamental_metrics
+from app.analysis.fundamental_metrics import (
+    calculate_fundamental_metrics,
+    calculate_quarterly_fundamental_metrics
+)
 
 
 def show_saved_assets():
@@ -187,3 +190,29 @@ def show_fundamental_metrics(ticker, limit_years=6):
         print(f"- Verbindlichkeiten / Assets: {format_percent(year_metrics['liabilities_to_assets'])}")
         print(f"- Cash / Assets: {format_percent(year_metrics['cash_to_assets'])}")
         print(f"- Capex / Umsatz: {format_percent(year_metrics['capex_to_revenue'])}")
+
+def show_quarterly_fundamental_metrics(ticker, limit_periods=8):
+    # hier zeigen wir berechnete Quartalskennzahlen
+    # dadurch sehen wir kurzfristige Trends wie QoQ- und YoY-Wachstum
+    metrics = calculate_quarterly_fundamental_metrics(ticker)
+
+    print(f"\nBerechnete Quartals-Kennzahlen für {ticker}:")
+
+    if not metrics:
+        print("- Noch keine Quartalskennzahlen berechenbar.")
+        return
+
+    for quarter_metrics in metrics[:limit_periods]:
+        fiscal_year = quarter_metrics["fiscal_year"]
+        period = quarter_metrics["period"]
+
+        print(f"\n{period} {fiscal_year}:")
+        print(f"- Umsatz: {format_money(quarter_metrics['revenue'])} USD")
+        print(f"- Umsatzwachstum QoQ: {format_percent(quarter_metrics['revenue_growth_qoq'])}")
+        print(f"- Umsatzwachstum YoY: {format_percent(quarter_metrics['revenue_growth_yoy'])}")
+        print(f"- Net Margin: {format_percent(quarter_metrics['net_margin'])}")
+        print(f"- Operating Margin: {format_percent(quarter_metrics['operating_margin'])}")
+        print(f"- Free Cash Flow: {format_money(quarter_metrics['free_cash_flow'])} USD")
+        print(f"- FCF Margin: {format_percent(quarter_metrics['fcf_margin'])}")
+        print(f"- Verbindlichkeiten / Assets: {format_percent(quarter_metrics['liabilities_to_assets'])}")
+        print(f"- Cash / Assets: {format_percent(quarter_metrics['cash_to_assets'])}")

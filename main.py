@@ -8,7 +8,8 @@ from app.reports.console_reports import (
     show_latest_prices,
     show_fundamentals,
     show_quarterly_fundamentals,
-    show_fundamental_metrics
+    show_fundamental_metrics,
+    show_quarterly_fundamental_metrics
 )
 
 
@@ -46,6 +47,7 @@ def main():
         show_fundamentals(ticker)
         show_quarterly_fundamentals(ticker)
         show_fundamental_metrics(ticker)
+        show_quarterly_fundamental_metrics(ticker)
     else:
         fundamentals_result = {
             "ticker": ticker,
