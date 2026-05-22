@@ -16,16 +16,16 @@ def safe_divide(numerator, denominator):
     return numerator / denominator
 
 
-def get_fundamentals_by_year(ticker):
-    # hier holen wir alle gespeicherten Fundamentaldaten für einen Ticker
-    # und sortieren sie in ein Dictionary nach Geschäftsjahr
+def get_annual_fundamentals_by_year(ticker):
+    # hier holen wir nur Jahresdaten aus der Datenbank
+    # wichtig: Quartale werden bewusst ausgeschlossen, damit sie keine Jahreswerte überschreiben
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
     SELECT fiscal_year, metric, value
     FROM fundamentals
-    WHERE ticker = ?
+    WHERE ticker = ? AND period = 'FY'
     ORDER BY fiscal_year ASC;
     """, (ticker,))
 
@@ -44,7 +44,7 @@ def get_fundamentals_by_year(ticker):
 
 
 def calculate_metrics_for_year(fiscal_year, values, previous_values=None):
-    # hier holen wir die wichtigsten Rohwerte für ein bestimmtes Jahr heraus
+    # hier holen wir die wichtigsten Rohwerte für ein bestimmtes Geschäftsjahr heraus
     revenue = values.get("revenue")
     net_income = values.get("net_income")
     operating_income = values.get("operating_income")
@@ -55,13 +55,13 @@ def calculate_metrics_for_year(fiscal_year, values, previous_values=None):
     cash = values.get("cash")
 
     # hier berechnen wir Free Cash Flow
-    # klassisch vereinfacht: operativer Cashflow minus Capex
+    # vereinfacht: operativer Cashflow minus Capex
     free_cash_flow = None
 
     if operating_cash_flow is not None and capex is not None:
         free_cash_flow = operating_cash_flow - capex
 
-    # hier berechnen wir das Umsatzwachstum gegenüber dem Vorjahr
+    # hier berechnen wir Umsatzwachstum gegenüber dem Vorjahr
     revenue_growth = None
 
     if previous_values:
@@ -93,9 +93,9 @@ def calculate_metrics_for_year(fiscal_year, values, previous_values=None):
 
 
 def calculate_fundamental_metrics(ticker):
-    # hier berechnen wir Kennzahlen für alle Jahre,
-    # für die Fundamentaldaten in der Datenbank gespeichert sind
-    fundamentals_by_year = get_fundamentals_by_year(ticker)
+    # hier berechnen wir nur Jahreskennzahlen
+    # Quartalskennzahlen bekommen später eine eigene Funktion
+    fundamentals_by_year = get_annual_fundamentals_by_year(ticker)
 
     years = sorted(fundamentals_by_year.keys())
     all_metrics = []
@@ -118,7 +118,7 @@ def calculate_fundamental_metrics(ticker):
         all_metrics.append(metrics)
 
     # hier drehen wir die Reihenfolge um,
-    # damit das neueste Jahr oben angezeigt wird
+    # damit das neueste Geschäftsjahr oben angezeigt wird
     return sorted(
         all_metrics,
         key=lambda item: item["fiscal_year"],
