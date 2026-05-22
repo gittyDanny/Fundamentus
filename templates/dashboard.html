@@ -14,6 +14,42 @@
 
     <main>
         <section class="card">
+            <h2>Steuerung</h2>
+
+            <form action="{{ url_for('update_all_prices') }}" method="post">
+                <button type="submit">Alle Kursdaten aktualisieren</button>
+            </form>
+
+            {% if update_result %}
+                <div class="message">
+                    <strong>{{ update_result["ticker"] }}</strong> aktualisiert:
+                    {{ update_result["loaded_rows"] }} Zeilen geladen,
+                    {{ update_result["new_rows"] }} neue Zeilen gespeichert.
+                </div>
+            {% endif %}
+
+            {% if update_results %}
+                <div class="message">
+                    <strong>Alle Ticker wurden verarbeitet:</strong>
+                    <ul>
+                        {% for result in update_results %}
+                            <li>
+                                {{ result["ticker"] }}:
+                                {{ result["loaded_rows"] }} geladen,
+                                {{ result["new_rows"] }} neu gespeichert,
+                                Status: {{ result["status"] }}
+                                {% if result["status"] == "error" %}
+                                    <br>
+                                    Fehler: {{ result["error"] }}
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="card">
             <h2>Watchlist</h2>
 
             <table>
@@ -25,6 +61,7 @@
                         <th>Region</th>
                         <th>Währung</th>
                         <th>Sektor</th>
+                        <th>Aktion</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,6 +77,11 @@
                         <td>{{ asset[3] }}</td>
                         <td>{{ asset[4] }}</td>
                         <td>{{ asset[5] }}</td>
+                        <td>
+                            <form action="{{ url_for('update_prices_for_ticker', ticker=asset[0]) }}" method="post">
+                                <button type="submit">Aktualisieren</button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -76,7 +118,9 @@
                 </table>
             {% else %}
                 <p>Für diesen Ticker sind noch keine Kursdaten gespeichert.</p>
-                <p>Starte zuerst <code>python main.py</code>, damit Fundamentus Kursdaten lädt.</p>
+                <form action="{{ url_for('update_prices_for_ticker', ticker=selected_ticker) }}" method="post">
+                    <button type="submit">Kursdaten für {{ selected_ticker }} laden</button>
+                </form>
             {% endif %}
         </section>
     </main>
