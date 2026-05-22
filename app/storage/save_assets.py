@@ -2,8 +2,8 @@ from app.database import get_connection
 
 
 def save_asset(asset):
-    # hier speichern wir ein Asset aus der Watchlist in der Datenbank
-    # INSERT OR IGNORE verhindert doppelte Einträge beim mehrfachen Starten
+    # hier speichern wir ein einzelnes Asset aus der Watchlist
+    # INSERT OR IGNORE verhindert doppelte Ticker in der Datenbank
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -25,7 +25,7 @@ def save_asset(asset):
 
 
 def save_assets(assets):
-    # hier gehen wir durch alle Werte aus der Watchlist
-    # und speichern jeden einzelnen in der assets-Tabelle
+    # hier gehen wir durch alle Assets aus der Watchlist
+    # und speichern sie nacheinander in der Datenbank
     for asset in assets:
         save_asset(asset)

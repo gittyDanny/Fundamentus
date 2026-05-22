@@ -1,6 +1,7 @@
 from pathlib import Path
 import sqlite3
 
+
 DB_PATH = Path("data/fundamentus.db")
 
 
@@ -14,8 +15,8 @@ def get_connection():
 
 
 def init_db():
-    # hier legen wir die Tabellen an, falls sie noch nicht existieren
-    # dadurch kann main.py mehrfach laufen, ohne jedes Mal alles kaputtzumachen
+    # hier legen wir alle Tabellen an, die Fundamentus aktuell braucht
+    # wenn Tabellen schon existieren, passiert einfach nichts Schlimmes
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -45,35 +46,6 @@ def init_db():
         source TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(ticker, date, source)
-    );
-    """)
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS news (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        source TEXT,
-        published_at TEXT,
-        url TEXT,
-        summary TEXT,
-        raw_text TEXT,
-        ticker TEXT,
-        language TEXT,
-        source_api TEXT,
-        content_hash TEXT UNIQUE,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-    """)
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS raw_api_responses (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        source TEXT NOT NULL,
-        endpoint TEXT,
-        query TEXT,
-        response_json TEXT,
-        response_hash TEXT UNIQUE,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
     """)
 
