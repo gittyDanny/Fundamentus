@@ -4,11 +4,15 @@ from app.database import init_db, get_connection
 from app.config import load_watchlist
 from app.storage.save_assets import save_assets
 from app.jobs.price_update_job import update_daily_prices_for_ticker, update_daily_prices_for_assets
-from app.jobs.fundamentals_update_job import update_fundamentals_for_asset
+from app.jobs.fundamentals_update_job import (
+    update_fundamentals_for_asset,
+    update_fundamentals_for_assets
+)
 from app.analysis.fundamental_metrics import (
     calculate_fundamental_metrics,
     calculate_quarterly_fundamental_metrics
 )
+from app.analysis.fundamental_score import build_fundamentus_score
 
 
 flask_app = Flask(__name__)
@@ -173,6 +177,7 @@ def asset_dashboard(ticker):
     annual_metrics = calculate_fundamental_metrics(ticker)
     quarterly_metrics = calculate_quarterly_fundamental_metrics(ticker)
     latest_annual_metrics = get_latest_annual_metrics(ticker)
+    fundamentus_score = build_fundamentus_score(ticker)
 
     message = request.args.get("message")
 
@@ -185,6 +190,7 @@ def asset_dashboard(ticker):
         annual_metrics=annual_metrics[:6],
         quarterly_metrics=quarterly_metrics[:8],
         latest_annual_metrics=latest_annual_metrics,
+        fundamentus_score=fundamentus_score,
         message=message
     )
 
@@ -205,7 +211,6 @@ def update_prices(ticker):
 @flask_app.route("/update/fundamentals/<ticker>", methods=["POST"])
 def update_fundamentals(ticker):
     # hier aktualisieren wir Fundamentaldaten für einen einzelnen Ticker
-    # aktuell funktioniert das nur für Assets mit CIK, also vor allem US-Aktien
     asset = get_asset_by_ticker(ticker)
 
     if not asset:
@@ -216,6 +221,8 @@ def update_fundamentals(ticker):
 
     if result["status"] == "skipped":
         message = f"{ticker}: übersprungen, keine CIK vorhanden."
+    elif result["status"] == "error":
+        message = f"{ticker}: Fehler beim Fundamentaldaten-Import: {result['reason']}"
     else:
         message = (
             f"{ticker}: {result['loaded_rows']} Fundamentaldaten verarbeitet, "
@@ -242,6 +249,35 @@ def update_all_prices():
     message = (
         f"Alle Kurse aktualisiert: {successful_updates} Ticker erfolgreich, "
         f"{new_rows} neue Kurszeilen gespeichert."
+    )
+
+    return redirect(url_for("asset_dashboard", ticker="TSLA", message=message))
+
+
+@flask_app.route("/update/all-fundamentals", methods=["POST"])
+def update_all_fundamentals():
+    # hier aktualisieren wir Fundamentaldaten für alle Assets mit CIK
+    assets = get_assets()
+    results = update_fundamentals_for_assets(assets)
+
+    ok_count = 0
+    skipped_count = 0
+    error_count = 0
+    saved_rows = 0
+
+    for result in results:
+        if result["status"] == "ok":
+            ok_count += 1
+            saved_rows += result["saved_rows"]
+        elif result["status"] == "skipped":
+            skipped_count += 1
+        else:
+            error_count += 1
+
+    message = (
+        f"Fundamentaldaten aktualisiert: {ok_count} erfolgreich, "
+        f"{skipped_count} übersprungen, {error_count} Fehler, "
+        f"{saved_rows} Zeilen gespeichert."
     )
 
     return redirect(url_for("asset_dashboard", ticker="TSLA", message=message))

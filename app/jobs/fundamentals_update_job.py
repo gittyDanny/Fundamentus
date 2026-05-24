@@ -22,16 +22,40 @@ def update_fundamentals_for_asset(asset):
             "deleted_rows": 0
         }
 
-    company_facts = fetch_company_facts_from_sec(cik)
-    fundamentals = normalize_sec_company_facts(ticker, company_facts)
+    try:
+        company_facts = fetch_company_facts_from_sec(cik)
+        fundamentals = normalize_sec_company_facts(ticker, company_facts)
 
-    deleted_rows = delete_fundamentals_for_ticker(ticker)
-    saved_rows = save_fundamentals(fundamentals)
+        deleted_rows = delete_fundamentals_for_ticker(ticker)
+        saved_rows = save_fundamentals(fundamentals)
 
-    return {
-        "ticker": ticker,
-        "status": "ok",
-        "loaded_rows": len(fundamentals),
-        "saved_rows": saved_rows,
-        "deleted_rows": deleted_rows
-    }
+        return {
+            "ticker": ticker,
+            "status": "ok",
+            "reason": None,
+            "loaded_rows": len(fundamentals),
+            "saved_rows": saved_rows,
+            "deleted_rows": deleted_rows
+        }
+
+    except Exception as error:
+        return {
+            "ticker": ticker,
+            "status": "error",
+            "reason": str(error),
+            "loaded_rows": 0,
+            "saved_rows": 0,
+            "deleted_rows": 0
+        }
+
+
+def update_fundamentals_for_assets(assets):
+    # hier aktualisieren wir Fundamentaldaten für alle Assets,
+    # die eine CIK besitzen
+    results = []
+
+    for asset in assets:
+        result = update_fundamentals_for_asset(asset)
+        results.append(result)
+
+    return results

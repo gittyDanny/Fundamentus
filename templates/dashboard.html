@@ -22,6 +22,10 @@
             <button class="full-button" type="submit">Alle Kurse aktualisieren</button>
         </form>
 
+        <form action="{{ url_for('update_all_fundamentals') }}" method="post">
+            <button class="full-button secondary" type="submit">Alle Fundamentaldaten aktualisieren</button>
+        </form>
+
         <div class="watchlist">
             <h2>Watchlist</h2>
 
@@ -30,6 +34,12 @@
                    href="{{ url_for('asset_dashboard', ticker=asset.ticker) }}">
                     <span>{{ asset.ticker }}</span>
                     <small>{{ asset.name }}</small>
+
+                    {% if asset.cik %}
+                        <em>SEC aktiv</em>
+                    {% else %}
+                        <em>Nur Kurse</em>
+                    {% endif %}
                 </a>
             {% endfor %}
         </div>
@@ -43,6 +53,9 @@
                 <h2>{{ selected_asset.ticker }} · {{ selected_asset.name }}</h2>
                 <p class="muted">
                     {{ selected_asset.region }} · {{ selected_asset.sector }} · {{ selected_asset.currency }}
+                    {% if selected_asset.cik %}
+                        · CIK {{ selected_asset.cik }}
+                    {% endif %}
                 </p>
             </div>
 
@@ -99,13 +112,65 @@
 
             <div class="kpi-card">
                 <span>Free Cash Flow</span>
-                {% if latest_annual_metrics and latest_annual_metrics.free_cash_flow %}
+                {% if latest_annual_metrics and latest_annual_metrics.free_cash_flow is not none %}
                     <strong>{{ "%.2f"|format(latest_annual_metrics.free_cash_flow / 1000000000) }} Mrd.</strong>
                     <small>OCF minus Capex</small>
                 {% else %}
                     <strong>n/a</strong>
                     <small>Noch nicht berechenbar</small>
                 {% endif %}
+            </div>
+        </section>
+
+        <section class="score-card {{ fundamentus_score.status_class }}">
+            <div class="score-header">
+                <div>
+                    <p class="eyebrow">Fundamentus Einschätzung</p>
+                    <h3>{{ fundamentus_score.status }}</h3>
+
+                    {% if fundamentus_score.score is not none %}
+                        <p class="muted">
+                            Score: {{ fundamentus_score.score }} / {{ fundamentus_score.max_score }}
+                            · {{ "%.0f"|format(fundamentus_score.score_percent * 100) }}%
+                        </p>
+                    {% else %}
+                        <p class="muted">Noch nicht genug Daten vorhanden.</p>
+                    {% endif %}
+                </div>
+
+                <div class="score-badge">
+                    {{ fundamentus_score.status }}
+                </div>
+            </div>
+
+            <div class="score-columns">
+                <div>
+                    <h4>Positive Punkte</h4>
+
+                    {% if fundamentus_score.reasons %}
+                        <ul>
+                            {% for reason in fundamentus_score.reasons %}
+                                <li>{{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="empty-small">Noch keine positiven Score-Punkte.</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <h4>Warnhinweise</h4>
+
+                    {% if fundamentus_score.warnings %}
+                        <ul>
+                            {% for warning in fundamentus_score.warnings %}
+                                <li>{{ warning }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="empty-small">Keine harten Warnhinweise im aktuellen Regelset.</p>
+                    {% endif %}
+                </div>
             </div>
         </section>
 
@@ -136,20 +201,74 @@
                         {% for item in annual_metrics %}
                             <tr>
                                 <td>{{ item.fiscal_year }}</td>
-                                <td>{{ "%.2f"|format(item.revenue / 1000000000) if item.revenue else "n/a" }} Mrd.</td>
-                                <td>{{ "%.2f"|format(item.revenue_growth * 100) if item.revenue_growth is not none else "n/a" }}%</td>
-                                <td>{{ "%.2f"|format(item.net_margin * 100) if item.net_margin is not none else "n/a" }}%</td>
-                                <td>{{ "%.2f"|format(item.operating_margin * 100) if item.operating_margin is not none else "n/a" }}%</td>
-                                <td>{{ "%.2f"|format(item.free_cash_flow / 1000000000) if item.free_cash_flow else "n/a" }} Mrd.</td>
-                                <td>{{ "%.2f"|format(item.fcf_margin * 100) if item.fcf_margin is not none else "n/a" }}%</td>
-                                <td>{{ "%.2f"|format(item.liabilities_to_assets * 100) if item.liabilities_to_assets is not none else "n/a" }}%</td>
+
+                                <td>
+                                    {% if item.revenue %}
+                                        {{ "%.2f"|format(item.revenue / 1000000000) }} Mrd.
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.revenue_growth is not none %}
+                                        {{ "%.2f"|format(item.revenue_growth * 100) }}%
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.net_margin is not none %}
+                                        {{ "%.2f"|format(item.net_margin * 100) }}%
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.operating_margin is not none %}
+                                        {{ "%.2f"|format(item.operating_margin * 100) }}%
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.free_cash_flow is not none %}
+                                        {{ "%.2f"|format(item.free_cash_flow / 1000000000) }} Mrd.
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.fcf_margin is not none %}
+                                        {{ "%.2f"|format(item.fcf_margin * 100) }}%
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.liabilities_to_assets is not none %}
+                                        {{ "%.2f"|format(item.liabilities_to_assets * 100) }}%
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
                     </table>
                 </div>
             {% else %}
-                <p class="empty">Noch keine Jahreskennzahlen vorhanden.</p>
+                <p class="empty">
+                    Noch keine Jahreskennzahlen vorhanden.
+                    {% if not selected_asset.cik %}
+                        Für dieses Asset ist aktuell keine SEC-CIK hinterlegt.
+                    {% endif %}
+                </p>
             {% endif %}
         </section>
 
@@ -179,19 +298,66 @@
                         {% for item in quarterly_metrics %}
                             <tr>
                                 <td>{{ item.period }} {{ item.fiscal_year }}</td>
-                                <td>{{ "%.2f"|format(item.revenue / 1000000000) if item.revenue else "n/a" }} Mrd.</td>
-                                <td>{{ "%.2f"|format(item.revenue_growth_qoq * 100) if item.revenue_growth_qoq is not none else "n/a" }}%</td>
-                                <td>{{ "%.2f"|format(item.revenue_growth_yoy * 100) if item.revenue_growth_yoy is not none else "n/a" }}%</td>
-                                <td>{{ "%.2f"|format(item.net_margin * 100) if item.net_margin is not none else "n/a" }}%</td>
-                                <td>{{ "%.2f"|format(item.operating_margin * 100) if item.operating_margin is not none else "n/a" }}%</td>
-                                <td>{{ "%.2f"|format(item.free_cash_flow / 1000000000) if item.free_cash_flow else "n/a" }} Mrd.</td>
+
+                                <td>
+                                    {% if item.revenue %}
+                                        {{ "%.2f"|format(item.revenue / 1000000000) }} Mrd.
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.revenue_growth_qoq is not none %}
+                                        {{ "%.2f"|format(item.revenue_growth_qoq * 100) }}%
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.revenue_growth_yoy is not none %}
+                                        {{ "%.2f"|format(item.revenue_growth_yoy * 100) }}%
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.net_margin is not none %}
+                                        {{ "%.2f"|format(item.net_margin * 100) }}%
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.operating_margin is not none %}
+                                        {{ "%.2f"|format(item.operating_margin * 100) }}%
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if item.free_cash_flow is not none %}
+                                        {{ "%.2f"|format(item.free_cash_flow / 1000000000) }} Mrd.
+                                    {% else %}
+                                        n/a
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
                     </table>
                 </div>
             {% else %}
-                <p class="empty">Noch keine Quartalskennzahlen vorhanden.</p>
+                <p class="empty">
+                    Noch keine Quartalskennzahlen vorhanden.
+                    {% if not selected_asset.cik %}
+                        Für dieses Asset ist aktuell keine SEC-CIK hinterlegt.
+                    {% endif %}
+                </p>
             {% endif %}
         </section>
 

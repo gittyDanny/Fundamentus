@@ -13,6 +13,7 @@ assets:
     region: US
     currency: USD
     sector: Technology
+    cik: "0001045810"
 
   - ticker: PLTR
     name: Palantir
@@ -20,6 +21,7 @@ assets:
     region: US
     currency: USD
     sector: Technology
+    cik: "0001321655"
 
   - ticker: AMD
     name: Advanced Micro Devices
@@ -27,6 +29,7 @@ assets:
     region: US
     currency: USD
     sector: Technology
+    cik: "0000002488"
 
   - ticker: SIE.DE
     name: Siemens
