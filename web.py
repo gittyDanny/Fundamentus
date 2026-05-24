@@ -3,7 +3,10 @@ from flask import Flask, render_template, redirect, url_for, request
 from app.database import init_db, get_connection
 from app.config import load_watchlist
 from app.storage.save_assets import save_assets
-from app.jobs.price_update_job import update_daily_prices_for_ticker, update_daily_prices_for_assets
+from app.jobs.price_update_job import (
+    update_daily_prices_for_ticker,
+    update_daily_prices_for_assets
+)
 from app.jobs.fundamentals_update_job import (
     update_fundamentals_for_asset,
     update_fundamentals_for_assets
@@ -19,8 +22,8 @@ flask_app = Flask(__name__)
 
 
 def prepare_database():
-    # hier sorgen wir dafür, dass die Datenbank und die Watchlist bereit sind,
-    # bevor die Webapp Daten anzeigen will
+    # hier sorgen wir dafür, dass Tabellen existieren
+    # und dass die Watchlist in die Datenbank geschrieben wird
     init_db()
 
     assets = load_watchlist()
@@ -28,8 +31,8 @@ def prepare_database():
 
 
 def get_assets():
-    # hier holen wir die Watchlist aus der Datenbank,
-    # damit wir sie links im Dashboard anzeigen können
+    # hier holen wir alle Assets aus der Datenbank,
+    # damit sie links im Dashboard angezeigt werden können
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -59,7 +62,8 @@ def get_assets():
 
 
 def get_asset_by_ticker(ticker):
-    # hier suchen wir ein einzelnes Asset aus der Datenbank
+    # hier holen wir ein einzelnes Asset,
+    # weil wir es für die Detailseite und den SEC-Import brauchen
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -113,7 +117,8 @@ def get_latest_price(ticker):
 
 
 def get_latest_prices(ticker, limit=10):
-    # hier holen wir die letzten Tageskurse für die Kurstabelle
+    # hier holen wir die letzten Tageskurse,
+    # damit wir sie unten in der Tabelle anzeigen können
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -144,8 +149,7 @@ def get_latest_prices(ticker, limit=10):
 
 
 def get_latest_annual_metrics(ticker):
-    # hier holen wir die neuesten Jahreskennzahlen,
-    # damit die wichtigsten Werte oben als Karten angezeigt werden können
+    # hier holen wir das neueste Geschäftsjahr aus den berechneten Jahreskennzahlen
     metrics = calculate_fundamental_metrics(ticker)
 
     if not metrics:
@@ -154,10 +158,57 @@ def get_latest_annual_metrics(ticker):
     return metrics[0]
 
 
+def build_overview_rows(assets):
+    # hier bauen wir die Daten für die Screener-Tabelle zusammen
+    # pro Firma holen wir Kurs, Score und die neuesten Jahreskennzahlen
+    rows = []
+
+    for asset in assets:
+        ticker = asset["ticker"]
+
+        latest_price = get_latest_price(ticker)
+        latest_annual_metrics = get_latest_annual_metrics(ticker)
+        fundamentus_score = build_fundamentus_score(ticker)
+
+        row = {
+            "ticker": ticker,
+            "name": asset["name"],
+            "region": asset["region"],
+            "sector": asset["sector"],
+            "currency": asset["currency"],
+            "cik": asset["cik"],
+            "latest_price": latest_price,
+            "latest_annual_metrics": latest_annual_metrics,
+            "fundamentus_score": fundamentus_score
+        }
+
+        rows.append(row)
+
+    return rows
+
+
 @flask_app.route("/")
 def index():
-    # hier leiten wir erstmal standardmäßig zu TSLA weiter
-    return redirect(url_for("asset_dashboard", ticker="TSLA"))
+    # die Startseite ist jetzt die Übersicht,
+    # weil Fundamentus mehrere Firmen vergleichen soll
+    return redirect(url_for("overview"))
+
+
+@flask_app.route("/overview")
+def overview():
+    # hier bauen wir die Vergleichsseite für alle Watchlist-Firmen
+    prepare_database()
+
+    assets = get_assets()
+    overview_rows = build_overview_rows(assets)
+    message = request.args.get("message")
+
+    return render_template(
+        "overview.html",
+        assets=assets,
+        overview_rows=overview_rows,
+        message=message
+    )
 
 
 @flask_app.route("/asset/<ticker>")
@@ -169,7 +220,7 @@ def asset_dashboard(ticker):
     selected_asset = get_asset_by_ticker(ticker)
 
     if not selected_asset:
-        return redirect(url_for("index"))
+        return redirect(url_for("overview"))
 
     latest_price = get_latest_price(ticker)
     latest_prices = get_latest_prices(ticker, limit=10)
@@ -221,8 +272,10 @@ def update_fundamentals(ticker):
 
     if result["status"] == "skipped":
         message = f"{ticker}: übersprungen, keine CIK vorhanden."
+
     elif result["status"] == "error":
         message = f"{ticker}: Fehler beim Fundamentaldaten-Import: {result['reason']}"
+
     else:
         message = (
             f"{ticker}: {result['loaded_rows']} Fundamentaldaten verarbeitet, "
@@ -251,12 +304,13 @@ def update_all_prices():
         f"{new_rows} neue Kurszeilen gespeichert."
     )
 
-    return redirect(url_for("asset_dashboard", ticker="TSLA", message=message))
+    return redirect(url_for("overview", message=message))
 
 
 @flask_app.route("/update/all-fundamentals", methods=["POST"])
 def update_all_fundamentals():
-    # hier aktualisieren wir Fundamentaldaten für alle Assets mit CIK
+    # hier aktualisieren wir Fundamentaldaten für alle Assets aus der Watchlist
+    # Assets ohne CIK werden sauber übersprungen
     assets = get_assets()
     results = update_fundamentals_for_assets(assets)
 
@@ -269,8 +323,10 @@ def update_all_fundamentals():
         if result["status"] == "ok":
             ok_count += 1
             saved_rows += result["saved_rows"]
+
         elif result["status"] == "skipped":
             skipped_count += 1
+
         else:
             error_count += 1
 
@@ -280,12 +336,12 @@ def update_all_fundamentals():
         f"{saved_rows} Zeilen gespeichert."
     )
 
-    return redirect(url_for("asset_dashboard", ticker="TSLA", message=message))
+    return redirect(url_for("overview", message=message))
 
 
 if __name__ == "__main__":
     prepare_database()
 
-    # debug=True ist beim Entwickeln praktisch,
-    # später auf dem Raspberry Pi stellen wir das aus
+    # debug=True ist gut fürs Entwickeln,
+    # auf dem Raspberry Pi stellen wir das später aus
     flask_app.run(debug=True)

@@ -410,4 +410,66 @@ tr:hover td {
     .score-header {
         flex-direction: column;
     }
+
+    .nav-link {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 12px 14px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    font-weight: bold;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: #2563eb;
+}
+
+.status-pill {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-pill.good {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-pill.mixed {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-pill.bad {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-pill.neutral {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.detail-link {
+    color: #2563eb;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.detail-link:hover {
+    text-decoration: underline;
+}
+
+.overview-table td {
+    vertical-align: top;
+}
+
+td small {
+    color: #6b7280;
+}
 }

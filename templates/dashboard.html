@@ -10,21 +10,21 @@
 <div class="layout">
 
     <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-mark">F</div>
-            <div>
-                <h1>Fundamentus</h1>
-                <p>Market Intelligence Server</p>
-            </div>
+    <div class="brand">
+        <div class="brand-mark">F</div>
+        <div>
+            <h1>Fundamentus</h1>
+            <p>Market Intelligence Server</p>
         </div>
+    </div>
 
-        <form action="{{ url_for('update_all_prices') }}" method="post">
-            <button class="full-button" type="submit">Alle Kurse aktualisieren</button>
-        </form>
+    <a class="nav-link" href="{{ url_for('overview') }}">
+        Gesamtübersicht
+    </a>
 
-        <form action="{{ url_for('update_all_fundamentals') }}" method="post">
-            <button class="full-button secondary" type="submit">Alle Fundamentaldaten aktualisieren</button>
-        </form>
+    <form action="{{ url_for('update_all_prices') }}" method="post">
+        <button class="full-button" type="submit">Alle Kurse aktualisieren</button>
+    </form>
 
         <div class="watchlist">
             <h2>Watchlist</h2>

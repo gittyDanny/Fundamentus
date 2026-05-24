@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Fundamentus Übersicht</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-mark">F</div>
+            <div>
+                <h1>Fundamentus</h1>
+                <p>Market Intelligence Server</p>
+            </div>
+        </div>
+
+        <a class="nav-link active" href="{{ url_for('overview') }}">
+            Gesamtübersicht
+        </a>
+
+        <form action="{{ url_for('update_all_prices') }}" method="post">
+            <button class="full-button" type="submit">Alle Kurse aktualisieren</button>
+        </form>
+
+        <form action="{{ url_for('update_all_fundamentals') }}" method="post">
+            <button class="full-button secondary" type="submit">Alle Fundamentaldaten aktualisieren</button>
+        </form>
+
+        <div class="watchlist">
+            <h2>Watchlist</h2>
+
+            {% for asset in assets %}
+                <a class="watchlist-item"
+                   href="{{ url_for('asset_dashboard', ticker=asset.ticker) }}">
+                    <span>{{ asset.ticker }}</span>
+                    <small>{{ asset.name }}</small>
+
+                    {% if asset.cik %}
+                        <em>SEC aktiv</em>
+                    {% else %}
+                        <em>Nur Kurse</em>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </aside>
+
+    <main class="content">
+
+        <section class="hero">
+            <div>
+                <p class="eyebrow">Screener</p>
+                <h2>Fundamentus Gesamtübersicht</h2>
+                <p class="muted">
+                    Vergleich deiner Watchlist nach Kursdaten, Fundamentaldaten und Fundamentus Score.
+                </p>
+            </div>
+        </section>
+
+        {% if message %}
+            <section class="message">
+                {{ message }}
+            </section>
+        {% endif %}
+
+        <section class="card">
+            <div class="section-heading">
+                <div>
+                    <h3>Watchlist-Screener</h3>
+                    <p>Erste Bewertungsübersicht für alle beobachteten Unternehmen</p>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="overview-table">
+                    <thead>
+                    <tr>
+                        <th>Ticker</th>
+                        <th>Name</th>
+                        <th>Region</th>
+                        <th>Sektor</th>
+                        <th>Kurs</th>
+                        <th>Score</th>
+                        <th>Umsatz FY</th>
+                        <th>Wachstum</th>
+                        <th>Net Margin</th>
+                        <th>FCF</th>
+                        <th>Status</th>
+                        <th>Detail</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in overview_rows %}
+                        <tr>
+                            <td><strong>{{ row.ticker }}</strong></td>
+                            <td>{{ row.name }}</td>
+                            <td>{{ row.region }}</td>
+                            <td>{{ row.sector }}</td>
+
+                            <td>
+                                {% if row.latest_price %}
+                                    {{ "%.2f"|format(row.latest_price.close) }} {{ row.currency }}
+                                    <br>
+                                    <small>{{ row.latest_price.date }}</small>
+                                {% else %}
+                                    n/a
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row.fundamentus_score.score is not none %}
+                                    {{ row.fundamentus_score.score }} / {{ row.fundamentus_score.max_score }}
+                                    <br>
+                                    <small>{{ "%.0f"|format(row.fundamentus_score.score_percent * 100) }}%</small>
+                                {% else %}
+                                    n/a
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row.latest_annual_metrics and row.latest_annual_metrics.revenue %}
+                                    {{ "%.2f"|format(row.latest_annual_metrics.revenue / 1000000000) }} Mrd.
+                                    <br>
+                                    <small>FY {{ row.latest_annual_metrics.fiscal_year }}</small>
+                                {% else %}
+                                    n/a
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row.latest_annual_metrics and row.latest_annual_metrics.revenue_growth is not none %}
+                                    {{ "%.2f"|format(row.latest_annual_metrics.revenue_growth * 100) }}%
+                                {% else %}
+                                    n/a
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row.latest_annual_metrics and row.latest_annual_metrics.net_margin is not none %}
+                                    {{ "%.2f"|format(row.latest_annual_metrics.net_margin * 100) }}%
+                                {% else %}
+                                    n/a
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row.latest_annual_metrics and row.latest_annual_metrics.free_cash_flow is not none %}
+                                    {{ "%.2f"|format(row.latest_annual_metrics.free_cash_flow / 1000000000) }} Mrd.
+                                {% else %}
+                                    n/a
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <span class="status-pill {{ row.fundamentus_score.status_class }}">
+                                    {{ row.fundamentus_score.status }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <a class="detail-link" href="{{ url_for('asset_dashboard', ticker=row.ticker) }}">
+                                    Öffnen
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-heading">
+                <div>
+                    <h3>Hinweis</h3>
+                    <p>Der Score ist ein einfacher Qualitätscheck, kein Kauf- oder Verkaufssignal.</p>
+                </div>
+            </div>
+
+            <p class="muted">
+                US-Aktien mit CIK können aktuell über SEC CompanyFacts ausgewertet werden.
+                Deutsche Aktien werden vorerst nur mit Kursdaten angezeigt.
+            </p>
+        </section>
+
+    </main>
+</div>
+
+</body>
+</html>
