@@ -77,5 +77,20 @@ def init_db():
     );
     """)
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS signals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ticker TEXT NOT NULL,
+        signal TEXT NOT NULL,
+        score REAL,
+        reason TEXT,
+        close REAL,
+        sma_20 REAL,
+        change_20d_pct REAL,
+        source TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
     conn.commit()
     conn.close()
