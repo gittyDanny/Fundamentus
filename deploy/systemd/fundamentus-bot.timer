@@ -1,9 +1,9 @@
 [Unit]
-Description=Run Fundamentus Bot every 60 minutes
+Description=Run Fundamentus Bot every 12 hours
 
 [Timer]
 OnBootSec=2min
-OnUnitActiveSec=60min
+OnUnitActiveSec=12h
 Unit=fundamentus-bot.service
 
 [Install]
