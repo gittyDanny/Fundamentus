@@ -21,16 +21,15 @@ def init_db():
     cursor = conn.cursor()
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS assets (
+    CREATE TABLE IF NOT EXISTS bot_runs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        ticker TEXT NOT NULL UNIQUE,
-        name TEXT,
-        asset_type TEXT,
-        region TEXT,
-        currency TEXT,
-        sector TEXT,
-        cik TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        started_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        finished_at TEXT,
+        status TEXT,
+        assets_processed INTEGER DEFAULT 0,
+        price_errors INTEGER DEFAULT 0,
+        signals_saved INTEGER DEFAULT 0,
+        error_message TEXT
     );
     """)
 
@@ -41,6 +40,15 @@ def init_db():
     except sqlite3.OperationalError:
         # hier landen wir, wenn die Spalte schon existiert
         # das ist okay, weil wir main.py mehrfach starten wollen
+        pass
+
+
+    try:
+        # hier ergänzen wir eine Aktiv-Spalte für ältere Datenbanken,
+        # damit entfernte Watchlist-Assets nicht weiter als aktiv gelten
+        cursor.execute("ALTER TABLE assets ADD COLUMN is_active INTEGER DEFAULT 1;")
+    except sqlite3.OperationalError:
+        # hier landen wir, wenn die Spalte schon existiert
         pass
 
     cursor.execute("""

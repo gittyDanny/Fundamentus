@@ -4,10 +4,9 @@ from app.storage.save_assets import save_assets
 from app.jobs.price_update_job import update_daily_prices_for_assets
 from app.jobs.signal_update_job import update_signals_for_assets
 from app.reports.signal_reports import show_latest_signals
-from app.reports.console_reports import (
-    show_saved_assets,
-    show_latest_prices
-)
+from app.collectors.sec_ticker_mapping import resolve_ciks_for_assets
+from app.reports.console_reports import show_saved_assets
+from app.storage.bot_runs import start_bot_run, finish_bot_run
 
 
 def print_price_update_results(price_results):
@@ -27,15 +26,6 @@ def print_price_update_results(price_results):
             error = result.get("error", "Unbekannter Fehler")
             print(f"- {ticker}: Fehler beim Kursdaten-Update: {error}")
 
-
-def show_latest_prices_for_assets(assets):
-    # hier zeigen wir für jedes Asset die letzten gespeicherten Kurse an
-    # das ist praktisch, weil wir direkt sehen, ob die Daten wirklich in der DB gelandet sind
-    print("\nLetzte gespeicherte Kurse pro Asset:")
-
-    for asset in assets:
-        ticker = asset["ticker"]
-        show_latest_prices(ticker)
 
 def print_signal_results(signal_result):
     # hier geben wir die frisch berechneten Signale aus,
@@ -60,17 +50,34 @@ def print_signal_results(signal_result):
             f"{reason}"
         )
 
+def count_price_errors(price_results):
+    # hier zählen wir, bei wie vielen Assets das Kursdaten-Update fehlgeschlagen ist
+    error_count = 0
+
+    for result in price_results:
+        if result.get("status") != "ok":
+            error_count += 1
+
+    return error_count
 
 def main():
     print("\nFundamentus Bot startet...")
 
     # Schritt 1: Datenbank vorbereiten
-    # hier werden die Tabellen angelegt, falls sie noch nicht existieren
+    # hier werden alle Tabellen angelegt, falls sie noch nicht existieren
     init_db()
+
+    # Schritt 1.1: Bot-Run in der Datenbank starten
+    # das darf erst nach init_db() passieren, weil sonst die Tabelle fehlen kann
+    run_id = start_bot_run()
 
     # Schritt 2: Watchlist laden
     # die Watchlist ist unsere zentrale Quelle dafür, welche Assets der Bot beobachten soll
     assets = load_watchlist()
+
+    # Schritt 2.1: CIKs für US-Aktien automatisch ergänzen
+    # dadurch müssen wir die SEC-Nummern nicht mehr manuell in der Watchlist pflegen
+    assets = resolve_ciks_for_assets(assets)
 
     # Schritt 3: Watchlist in der Datenbank speichern
     # dadurch kennt die Datenbank alle Ticker, Namen, Regionen und Sektoren aus der YAML-Datei
@@ -90,7 +97,7 @@ def main():
 
     # Schritt 7: letzte Kurse für alle Assets anzeigen
     # damit haben wir ein sichtbares erstes Ergebnis im Terminal
-    show_latest_prices_for_assets(assets)
+    # show_latest_prices_for_assets(assets)
 
     # Schritt 8: Signale für alle Assets berechnen
     # der Bot nutzt dafür die gespeicherten Kursdaten aus der Datenbank
@@ -103,6 +110,18 @@ def main():
     # Schritt 10: gespeicherte Signale nochmal aus der Datenbank anzeigen
     # dadurch prüfen wir, ob die Analyse wirklich persistiert wurde
     show_latest_signals()
+
+    price_errors = count_price_errors(price_results)
+
+    # Schritt 11: Bot-Run als erfolgreich abschließen
+    # dadurch sieht man später in der Webapp den letzten erfolgreichen Lauf
+    finish_bot_run(
+        run_id=run_id,
+        status="success",
+        assets_processed=len(assets),
+        price_errors=price_errors,
+        signals_saved=signal_result["saved_rows"]
+    )
 
     print("\nFundamentus Bot-Run abgeschlossen.")
     print(f"{len(assets)} Assets aus der Watchlist verarbeitet.")

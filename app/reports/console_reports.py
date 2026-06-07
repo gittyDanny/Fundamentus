@@ -6,26 +6,28 @@ from app.analysis.fundamental_metrics import (
 
 
 def show_saved_assets():
-    # hier zeigen wir an, welche Assets aktuell in der Datenbank stehen
+    # hier zeigen wir an, welche aktiven Assets aktuell in der Datenbank stehen
+    # inaktive Assets bleiben historisch in der DB, werden aber nicht mehr im Bot-Run angezeigt
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
     SELECT ticker, name, region, sector
     FROM assets
+    WHERE is_active = 1
     ORDER BY ticker;
     """)
 
     rows = cursor.fetchall()
     conn.close()
 
-    print("\nGespeicherte Assets in der Datenbank:")
+    print("\nAktive Assets in der Datenbank:")
 
     for row in rows:
         ticker, name, region, sector = row
         print(f"- {ticker}: {name} | {region} | {sector}")
 
-    print(f"\nInsgesamt gespeichert: {len(rows)} Assets")
+    print(f"\nInsgesamt aktiv: {len(rows)} Assets")
 
 
 def show_latest_prices(ticker, limit=5):

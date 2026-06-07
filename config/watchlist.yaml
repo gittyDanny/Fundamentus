@@ -31,6 +31,97 @@ assets:
     sector: Technology
     cik: "0000002488"
 
+  - ticker: MSFT
+    name: Microsoft
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: AAPL
+    name: Apple
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: GOOGL
+    name: Alphabet
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Communication Services
+
+  - ticker: AMZN
+    name: Amazon
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Consumer Cyclical
+
+  - ticker: META
+    name: Meta Platforms
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Communication Services
+
+  - ticker: AVGO
+    name: Broadcom
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: ORCL
+    name: Oracle
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: CRM
+    name: Salesforce
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: NOW
+    name: ServiceNow
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: ASML
+    name: ASML
+    asset_type: stock
+    region: Netherlands
+    currency: USD
+    sector: Technology
+
+  - ticker: TSM
+    name: Taiwan Semiconductor Manufacturing
+    asset_type: stock
+    region: Taiwan
+    currency: USD
+    sector: Technology
+
+  - ticker: QCOM
+    name: Qualcomm
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: INTC
+    name: Intel
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
   - ticker: SIE.DE
     name: Siemens
     asset_type: stock
@@ -58,3 +149,53 @@ assets:
     region: Germany
     currency: EUR
     sector: Technology
+
+  - ticker: AIR.DE
+    name: Airbus
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Industrials
+
+  - ticker: ALV.DE
+    name: Allianz
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Financial Services
+
+  - ticker: MUV2.DE
+    name: Munich Re
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Financial Services
+
+  - ticker: DTE.DE
+    name: Deutsche Telekom
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Communication Services
+
+  - ticker: MBG.DE
+    name: Mercedes-Benz Group
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Consumer Cyclical
+
+  - ticker: VOW3.DE
+    name: Volkswagen
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Consumer Cyclical
+
+  - ticker: BAS.DE
+    name: BASF
+    asset_type: stock
+    region: Germany
+    currency: EUR
+    sector: Basic Materials
+
