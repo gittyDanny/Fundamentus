@@ -1,0 +1,12 @@
+[Unit]
+Description=Fundamentus Bot Run
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=daniil
+WorkingDirectory=/home/daniil/Fundamentus
+ExecStart=/home/daniil/Fundamentus/.venv/bin/python /home/daniil/Fundamentus/main.py
+StandardOutput=append:/home/daniil/Fundamentus/logs/fundamentus.log
+StandardError=append:/home/daniil/Fundamentus/logs/fundamentus_error.log)
