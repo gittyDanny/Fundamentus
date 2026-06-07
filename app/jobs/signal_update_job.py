@@ -1,4 +1,4 @@
-from app.analysis.price_signals import calculate_price_signal
+from app.analysis.combined_signals import calculate_combined_signal
 from app.storage.save_signals import save_signals
 
 
@@ -12,7 +12,7 @@ def update_signals_for_assets(assets):
 
         try:
             # hier wird aus den gespeicherten Kursdaten ein BUY / HOLD / SELL Signal berechnet
-            signal = calculate_price_signal(ticker)
+            signal = calculate_combined_signal(asset)
             signal["status"] = "ok"
 
         except Exception as error:

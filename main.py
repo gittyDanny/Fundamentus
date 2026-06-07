@@ -7,6 +7,7 @@ from app.reports.signal_reports import show_latest_signals
 from app.collectors.sec_ticker_mapping import resolve_ciks_for_assets
 from app.reports.console_reports import show_saved_assets
 from app.storage.bot_runs import start_bot_run, finish_bot_run
+from app.jobs.fundamentals_update_job import update_fundamentals_for_assets
 
 
 def print_price_update_results(price_results):
@@ -26,6 +27,27 @@ def print_price_update_results(price_results):
             error = result.get("error", "Unbekannter Fehler")
             print(f"- {ticker}: Fehler beim Kursdaten-Update: {error}")
 
+def print_fundamental_update_results(fundamental_results):
+    # hier geben wir aus, bei welchen Assets Fundamentaldaten geladen wurden
+    # dadurch sehen wir direkt, welche Quelle SEC oder Yahoo genutzt wurde
+    print("\nFundamentaldaten-Update:")
+
+    for result in fundamental_results:
+        ticker = result.get("ticker")
+        status = result.get("status")
+        source = result.get("source")
+        loaded_rows = result.get("loaded_rows", 0)
+        saved_rows = result.get("saved_rows", 0)
+        reason = result.get("reason")
+
+        source_text = source if source else "none"
+
+        if status == "ok":
+            print(f"- {ticker}: {loaded_rows} Fundamentaldaten verarbeitet, {saved_rows} gespeichert | Quelle: {source_text}")
+        elif status == "skipped":
+            print(f"- {ticker}: übersprungen - {reason} | Quelle: {source_text}")
+        else:
+            print(f"- {ticker}: Fehler - {reason} | Quelle: {source_text}")
 
 def print_signal_results(signal_result):
     # hier geben wir die frisch berechneten Signale aus,
@@ -99,17 +121,24 @@ def main():
     # damit haben wir ein sichtbares erstes Ergebnis im Terminal
     # show_latest_prices_for_assets(assets)
 
-    # Schritt 8: Signale für alle Assets berechnen
-    # der Bot nutzt dafür die gespeicherten Kursdaten aus der Datenbank
+    # Schritt 8: Fundamentaldaten für Assets mit CIK aktualisieren
+    # diese Daten braucht der kombinierte Score aus Technik und Unternehmensqualität
+    fundamental_results = update_fundamentals_for_assets(assets)
+
+    # Schritt 9: Ergebnis vom Fundamentaldaten-Update anzeigen
+    # Assets ohne CIK werden dabei bewusst übersprungen
+    print_fundamental_update_results(fundamental_results)
+
+    # Schritt 10: Signale für alle Assets berechnen
+    # der Bot nutzt dafür Kursdaten und, falls vorhanden, Fundamentaldaten
     signal_result = update_signals_for_assets(assets)
 
-    # Schritt 9: Signale im Terminal anzeigen
-    # damit sehen wir direkt, welche Assets BUY, HOLD oder SELL bekommen haben
+    # Schritt 11: Signale im Terminal anzeigen
     print_signal_results(signal_result)
 
     # Schritt 10: gespeicherte Signale nochmal aus der Datenbank anzeigen
     # dadurch prüfen wir, ob die Analyse wirklich persistiert wurde
-    show_latest_signals()
+    show_latest_signals(limit=40)
 
     price_errors = count_price_errors(price_results)
 
