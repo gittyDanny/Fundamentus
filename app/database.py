@@ -21,6 +21,21 @@ def init_db():
     cursor = conn.cursor()
 
     cursor.execute("""
+    CREATE TABLE IF NOT EXISTS assets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ticker TEXT NOT NULL UNIQUE,
+        name TEXT,
+        asset_type TEXT,
+        region TEXT,
+        currency TEXT,
+        sector TEXT,
+        cik TEXT,
+        is_active INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    cursor.execute("""
     CREATE TABLE IF NOT EXISTS bot_runs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         started_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -41,7 +56,6 @@ def init_db():
         # hier landen wir, wenn die Spalte schon existiert
         # das ist okay, weil wir main.py mehrfach starten wollen
         pass
-
 
     try:
         # hier ergänzen wir eine Aktiv-Spalte für ältere Datenbanken,
