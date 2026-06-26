@@ -1,35 +1,10 @@
 assets:
-  - ticker: TSLA
-    name: Tesla
-    asset_type: stock
-    region: US
-    currency: USD
-    sector: Consumer Cyclical
-    cik: "0001318605"
-
-  - ticker: NVDA
-    name: Nvidia
+  - ticker: AAPL
+    name: Apple
     asset_type: stock
     region: US
     currency: USD
     sector: Technology
-    cik: "0001045810"
-
-  - ticker: PLTR
-    name: Palantir
-    asset_type: stock
-    region: US
-    currency: USD
-    sector: Technology
-    cik: "0001321655"
-
-  - ticker: AMD
-    name: Advanced Micro Devices
-    asset_type: stock
-    region: US
-    currency: USD
-    sector: Technology
-    cik: "0000002488"
 
   - ticker: MSFT
     name: Microsoft
@@ -38,8 +13,64 @@ assets:
     currency: USD
     sector: Technology
 
-  - ticker: AAPL
-    name: Apple
+  - ticker: NVDA
+    name: Nvidia
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: AMD
+    name: Advanced Micro Devices
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: AVGO
+    name: Broadcom
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: QCOM
+    name: Qualcomm
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: INTC
+    name: Intel
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: AMAT
+    name: Applied Materials
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: LRCX
+    name: Lam Research
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: KLAC
+    name: KLA
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Technology
+
+  - ticker: MU
+    name: Micron Technology
     asset_type: stock
     region: US
     currency: USD
@@ -52,13 +83,6 @@ assets:
     currency: USD
     sector: Communication Services
 
-  - ticker: AMZN
-    name: Amazon
-    asset_type: stock
-    region: US
-    currency: USD
-    sector: Consumer Cyclical
-
   - ticker: META
     name: Meta Platforms
     asset_type: stock
@@ -66,12 +90,19 @@ assets:
     currency: USD
     sector: Communication Services
 
-  - ticker: AVGO
-    name: Broadcom
+  - ticker: AMZN
+    name: Amazon
     asset_type: stock
     region: US
     currency: USD
-    sector: Technology
+    sector: Consumer Cyclical
+
+  - ticker: TSLA
+    name: Tesla
+    asset_type: stock
+    region: US
+    currency: USD
+    sector: Consumer Cyclical
 
   - ticker: ORCL
     name: Oracle
@@ -94,108 +125,51 @@ assets:
     currency: USD
     sector: Technology
 
-  - ticker: ASML
-    name: ASML
-    asset_type: stock
-    region: Netherlands
-    currency: USD
-    sector: Technology
-
-  - ticker: TSM
-    name: Taiwan Semiconductor Manufacturing
-    asset_type: stock
-    region: Taiwan
-    currency: USD
-    sector: Technology
-
-  - ticker: QCOM
-    name: Qualcomm
+  - ticker: PLTR
+    name: Palantir
     asset_type: stock
     region: US
     currency: USD
     sector: Technology
 
-  - ticker: INTC
-    name: Intel
+  - ticker: IBM
+    name: IBM
     asset_type: stock
     region: US
     currency: USD
     sector: Technology
 
-  - ticker: SIE.DE
-    name: Siemens
+  - ticker: SNOW
+    name: Snowflake
     asset_type: stock
-    region: Germany
-    currency: EUR
-    sector: Industrials
-
-  - ticker: ENR.DE
-    name: Siemens Energy
-    asset_type: stock
-    region: Germany
-    currency: EUR
-    sector: Energy
-
-  - ticker: RHM.DE
-    name: Rheinmetall
-    asset_type: stock
-    region: Germany
-    currency: EUR
-    sector: Industrials
-
-  - ticker: SAP.DE
-    name: SAP
-    asset_type: stock
-    region: Germany
-    currency: EUR
+    region: US
+    currency: USD
     sector: Technology
 
-  - ticker: AIR.DE
-    name: Airbus
+  - ticker: PANW
+    name: Palo Alto Networks
     asset_type: stock
-    region: Germany
-    currency: EUR
-    sector: Industrials
+    region: US
+    currency: USD
+    sector: Technology
 
-  - ticker: ALV.DE
-    name: Allianz
+  - ticker: CRWD
+    name: CrowdStrike
     asset_type: stock
-    region: Germany
-    currency: EUR
-    sector: Financial Services
+    region: US
+    currency: USD
+    sector: Technology
 
-  - ticker: MUV2.DE
-    name: Munich Re
+  - ticker: DDOG
+    name: Datadog
     asset_type: stock
-    region: Germany
-    currency: EUR
-    sector: Financial Services
+    region: US
+    currency: USD
+    sector: Technology
 
-  - ticker: DTE.DE
-    name: Deutsche Telekom
+  - ticker: NET
+    name: Cloudflare
     asset_type: stock
-    region: Germany
-    currency: EUR
-    sector: Communication Services
-
-  - ticker: MBG.DE
-    name: Mercedes-Benz Group
-    asset_type: stock
-    region: Germany
-    currency: EUR
-    sector: Consumer Cyclical
-
-  - ticker: VOW3.DE
-    name: Volkswagen
-    asset_type: stock
-    region: Germany
-    currency: EUR
-    sector: Consumer Cyclical
-
-  - ticker: BAS.DE
-    name: BASF
-    asset_type: stock
-    region: Germany
-    currency: EUR
-    sector: Basic Materials
-
+    region: US
+    currency: USD
+    sector: Technology
