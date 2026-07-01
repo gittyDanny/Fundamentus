@@ -9,3 +9,8 @@ data/
 logs/
 
 .vscode/
+
+# Firebase secrets
+bot/secrets/
+*.service-account.json
+firebase-service-account.json
