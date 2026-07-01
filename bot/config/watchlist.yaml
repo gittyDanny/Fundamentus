@@ -6,6 +6,13 @@ assets:
     currency: USD
     sector: Technology
 
+  - ticker: ASML
+    name: ASML Holding
+    asset_type: stock
+    region: Netherlands
+    currency: USD
+    sector: Technology
+
   - ticker: MSFT
     name: Microsoft
     asset_type: stock

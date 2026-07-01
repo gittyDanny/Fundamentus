@@ -1,3 +1,4 @@
+/* Globale Grundeinstellungen */
 * {
     box-sizing: border-box;
 }
@@ -9,11 +10,13 @@ body {
     color: #111827;
 }
 
+/* Gesamtlayout: Sidebar links, Inhalt rechts */
 .layout {
     display: flex;
     min-height: 100vh;
 }
 
+/* Linke Seitenleiste */
 .sidebar {
     width: 300px;
     background: #111827;
@@ -26,6 +29,7 @@ body {
     overflow-y: auto;
 }
 
+/* Logo und Name oben links */
 .brand {
     display: flex;
     gap: 14px;
@@ -56,6 +60,60 @@ body {
     font-size: 13px;
 }
 
+/* Navigation, z. B. Gesamtübersicht */
+.nav-link {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 12px 14px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    font-weight: bold;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: #2563eb;
+}
+
+/* Button-Styling */
+button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+button.secondary {
+    background: #111827;
+}
+
+button.secondary:hover {
+    background: #374151;
+}
+
+.full-button {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.full-button.secondary {
+    background: #374151;
+}
+
+.full-button.secondary:hover {
+    background: #4b5563;
+}
+
+/* Watchlist in der Sidebar */
 .watchlist h2 {
     margin-top: 26px;
     font-size: 14px;
@@ -85,17 +143,6 @@ body {
     color: #9ca3af;
 }
 
-.watchlist-item em {
-    display: inline-block;
-    margin-top: 8px;
-    font-style: normal;
-    font-size: 11px;
-    color: #d1d5db;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 999px;
-    padding: 3px 8px;
-}
-
 .watchlist-item:hover,
 .watchlist-item.active {
     background: #2563eb;
@@ -105,17 +152,46 @@ body {
     color: #dbeafe;
 }
 
-.watchlist-item.active em {
-    background: rgba(255, 255, 255, 0.18);
-    color: white;
+/* Kleine Datenbadges in der Watchlist */
+.watchlist-item em,
+.data-badge {
+    display: inline-block;
+    margin-top: 8px;
+    font-style: normal;
+    font-size: 11px;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-weight: bold;
 }
 
+.data-badge.sec {
+    background: rgba(219, 234, 254, 0.22);
+    color: #dbeafe;
+}
+
+.data-badge.yahoo {
+    background: rgba(220, 252, 231, 0.22);
+    color: #dcfce7;
+}
+
+.data-badge.ready {
+    background: rgba(254, 243, 199, 0.22);
+    color: #fef3c7;
+}
+
+.data-badge.price {
+    background: rgba(255, 255, 255, 0.08);
+    color: #d1d5db;
+}
+
+/* Hauptbereich rechts neben der Sidebar */
 .content {
     margin-left: 300px;
     padding: 32px;
     width: calc(100% - 300px);
 }
 
+/* Header-Karte */
 .hero {
     background: white;
     border-radius: 22px;
@@ -151,41 +227,7 @@ body {
     align-items: center;
 }
 
-button {
-    background: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 10px 16px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #1d4ed8;
-}
-
-button.secondary {
-    background: #111827;
-}
-
-button.secondary:hover {
-    background: #374151;
-}
-
-.full-button {
-    width: 100%;
-    margin-bottom: 14px;
-}
-
-.full-button.secondary {
-    background: #374151;
-}
-
-.full-button.secondary:hover {
-    background: #4b5563;
-}
-
+/* Meldungsbox nach Updates */
 .message {
     background: #ecfdf5;
     border: 1px solid #10b981;
@@ -196,6 +238,7 @@ button.secondary:hover {
     font-weight: bold;
 }
 
+/* KPI-Karten */
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -227,6 +270,68 @@ button.secondary:hover {
     color: #6b7280;
 }
 
+/* Signal-Karte für BUY/HOLD/SELL */
+.signal-card {
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    margin-bottom: 22px;
+    border: 1px solid transparent;
+}
+
+.signal-card.good {
+    background: #ecfdf5;
+    border-color: #10b981;
+}
+
+.signal-card.mixed {
+    background: #fffbeb;
+    border-color: #f59e0b;
+}
+
+.signal-card.bad {
+    background: #fef2f2;
+    border-color: #ef4444;
+}
+
+.signal-card.neutral {
+    background: white;
+    border-color: #e5e7eb;
+}
+
+/* Kleine Signal-KPIs innerhalb der Signal-Karte */
+.signal-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 14px;
+    margin-bottom: 14px;
+}
+
+.signal-metrics div {
+    background: rgba(255, 255, 255, 0.65);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.signal-metrics span {
+    display: block;
+    color: #6b7280;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.signal-metrics strong {
+    font-size: 20px;
+}
+
+.signal-reason {
+    margin: 0;
+    color: #374151;
+    line-height: 1.5;
+}
+
+/* Fundamental-Score-Karte */
 .score-card {
     border-radius: 22px;
     padding: 24px;
@@ -255,6 +360,7 @@ button.secondary:hover {
     border-color: #e5e7eb;
 }
 
+/* Kopfbereich von Signal- und Score-Karten */
 .score-header {
     display: flex;
     justify-content: space-between;
@@ -276,6 +382,7 @@ button.secondary:hover {
     font-weight: bold;
 }
 
+/* Zwei Spalten für positive Punkte und Warnhinweise */
 .score-columns {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -300,6 +407,7 @@ button.secondary:hover {
     margin: 0;
 }
 
+/* Standard-Karten */
 .card {
     background: white;
     border-radius: 22px;
@@ -325,6 +433,7 @@ button.secondary:hover {
     color: #6b7280;
 }
 
+/* Tabellen */
 .table-wrap {
     overflow-x: auto;
 }
@@ -353,6 +462,15 @@ tr:hover td {
     background: #f9fafb;
 }
 
+td small {
+    color: #6b7280;
+}
+
+.overview-table td {
+    vertical-align: top;
+}
+
+/* Leere Zustände */
 .empty {
     color: #6b7280;
     background: #f9fafb;
@@ -360,6 +478,76 @@ tr:hover td {
     border-radius: 14px;
 }
 
+/* BUY/HOLD/SELL Badges */
+.status-pill {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-pill.good {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-pill.mixed {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-pill.bad {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-pill.neutral {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Datenquelle-Badges in der Tabelle */
+.data-table-badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.data-table-badge.sec {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.data-table-badge.yahoo {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.data-table-badge.ready {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.data-table-badge.price {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Detail-Link in Tabellen */
+.detail-link {
+    color: #2563eb;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.detail-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Anpassung für mittlere Screens */
 @media (max-width: 1100px) {
     .kpi-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -370,8 +558,13 @@ tr:hover td {
         flex-direction: column;
         gap: 18px;
     }
+
+    .signal-metrics {
+        grid-template-columns: 1fr;
+    }
 }
 
+/* Responsive Anpassung für kleine Screens */
 @media (max-width: 800px) {
     .sidebar {
         position: static;
@@ -410,66 +603,4 @@ tr:hover td {
     .score-header {
         flex-direction: column;
     }
-
-    .nav-link {
-    display: block;
-    color: white;
-    text-decoration: none;
-    padding: 12px 14px;
-    border-radius: 12px;
-    margin-bottom: 14px;
-    background: rgba(255, 255, 255, 0.06);
-    font-weight: bold;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    background: #2563eb;
-}
-
-.status-pill {
-    display: inline-block;
-    border-radius: 999px;
-    padding: 6px 10px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.status-pill.good {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.status-pill.mixed {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.status-pill.bad {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.status-pill.neutral {
-    background: #e5e7eb;
-    color: #374151;
-}
-
-.detail-link {
-    color: #2563eb;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.detail-link:hover {
-    text-decoration: underline;
-}
-
-.overview-table td {
-    vertical-align: top;
-}
-
-td small {
-    color: #6b7280;
-}
 }

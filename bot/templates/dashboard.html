@@ -9,56 +9,77 @@
 
 <div class="layout">
 
+    <!-- Linke Seitenleiste mit Logo, Aktionen und Watchlist -->
     <aside class="sidebar">
-    <div class="brand">
-        <div class="brand-mark">F</div>
-        <div>
-            <h1>Fundamentus</h1>
-            <p>Market Intelligence Server</p>
+
+        <!-- Branding -->
+        <div class="brand">
+            <div class="brand-mark">F</div>
+            <div>
+                <h1>Fundamentus</h1>
+                <p>Market Intelligence Server</p>
+            </div>
         </div>
-    </div>
 
-    <a class="nav-link" href="{{ url_for('overview') }}">
-        Gesamtübersicht
-    </a>
+        <!-- Navigation zur Gesamtübersicht -->
+        <a class="nav-link" href="{{ url_for('overview') }}">
+            Gesamtübersicht
+        </a>
 
-    <form action="{{ url_for('update_all_prices') }}" method="post">
-        <button class="full-button" type="submit">Alle Kurse aktualisieren</button>
-    </form>
+        <!-- Globale Aktionen -->
+        <form action="{{ url_for('update_all_prices') }}" method="post">
+            <button class="full-button" type="submit">Alle Kurse aktualisieren</button>
+        </form>
 
+        <form action="{{ url_for('update_all_fundamentals') }}" method="post">
+            <button class="full-button secondary" type="submit">Alle Fundamentaldaten aktualisieren</button>
+        </form>
+
+        <form action="{{ url_for('update_all_signals') }}" method="post">
+            <button class="full-button secondary" type="submit">Alle Signale aktualisieren</button>
+        </form>
+
+        <!-- Watchlist -->
         <div class="watchlist">
             <h2>Watchlist</h2>
 
             {% for asset in assets %}
                 <a class="watchlist-item {% if asset.ticker == selected_asset.ticker %}active{% endif %}"
                    href="{{ url_for('asset_dashboard', ticker=asset.ticker) }}">
+
                     <span>{{ asset.ticker }}</span>
                     <small>{{ asset.name }}</small>
 
-                    {% if asset.cik %}
-                        <em>SEC aktiv</em>
-                    {% else %}
-                        <em>Nur Kurse</em>
-                    {% endif %}
+                    <!-- Datenstatus: SEC, Yahoo, SEC bereit oder nur Kurse -->
+                    <em class="data-badge {{ asset.data_status.class }}">
+                        {{ asset.data_status.label }}
+                    </em>
                 </a>
             {% endfor %}
         </div>
     </aside>
 
+    <!-- Hauptbereich -->
     <main class="content">
 
+        <!-- Header für den ausgewählten Ticker -->
         <section class="hero">
             <div>
                 <p class="eyebrow">Aktueller Ticker</p>
                 <h2>{{ selected_asset.ticker }} · {{ selected_asset.name }}</h2>
+
                 <p class="muted">
                     {{ selected_asset.region }} · {{ selected_asset.sector }} · {{ selected_asset.currency }}
+
                     {% if selected_asset.cik %}
                         · CIK {{ selected_asset.cik }}
                     {% endif %}
+
+                    · {{ selected_asset.data_status.label }}
                 </p>
             </div>
 
+            <!-- Einzelaktionen für den aktuellen Ticker -->
             <div class="actions">
                 <form action="{{ url_for('update_prices', ticker=selected_asset.ticker) }}" method="post">
                     <button type="submit">Kurse aktualisieren</button>
@@ -70,15 +91,20 @@
             </div>
         </section>
 
+        <!-- Erfolgsmeldungen oder Fehlermeldungen -->
         {% if message %}
             <section class="message">
                 {{ message }}
             </section>
         {% endif %}
 
+        <!-- Vier schnelle KPI-Karten -->
         <section class="kpi-grid">
+
+            <!-- Letzter Schlusskurs -->
             <div class="kpi-card">
                 <span>Letzter Schlusskurs</span>
+
                 {% if latest_price %}
                     <strong>{{ "%.2f"|format(latest_price.close) }} {{ selected_asset.currency }}</strong>
                     <small>{{ latest_price.date }}</small>
@@ -88,8 +114,10 @@
                 {% endif %}
             </div>
 
+            <!-- Umsatz -->
             <div class="kpi-card">
                 <span>Umsatz letztes FY</span>
+
                 {% if latest_annual_metrics and latest_annual_metrics.revenue %}
                     <strong>{{ "%.2f"|format(latest_annual_metrics.revenue / 1000000000) }} Mrd.</strong>
                     <small>Geschäftsjahr {{ latest_annual_metrics.fiscal_year }}</small>
@@ -99,8 +127,10 @@
                 {% endif %}
             </div>
 
+            <!-- Net Margin -->
             <div class="kpi-card">
                 <span>Net Margin</span>
+
                 {% if latest_annual_metrics and latest_annual_metrics.net_margin is not none %}
                     <strong>{{ "%.2f"|format(latest_annual_metrics.net_margin * 100) }}%</strong>
                     <small>Gewinn / Umsatz</small>
@@ -110,8 +140,10 @@
                 {% endif %}
             </div>
 
+            <!-- Free Cash Flow -->
             <div class="kpi-card">
                 <span>Free Cash Flow</span>
+
                 {% if latest_annual_metrics and latest_annual_metrics.free_cash_flow is not none %}
                     <strong>{{ "%.2f"|format(latest_annual_metrics.free_cash_flow / 1000000000) }} Mrd.</strong>
                     <small>OCF minus Capex</small>
@@ -122,19 +154,70 @@
             </div>
         </section>
 
+        <!-- BUY/HOLD/SELL-Signal aus main.py -->
+        <section class="signal-card {% if latest_signal %}{{ latest_signal.status_class }}{% else %}neutral{% endif %}">
+            <div class="score-header">
+                <div>
+                    <p class="eyebrow">Technisches Signal aus main.py</p>
+
+                    {% if latest_signal %}
+                        <h3>{{ latest_signal.signal }}</h3>
+                        <p class="muted">
+                            Signal-Score: {{ latest_signal.score }}
+                            · Stand: {{ latest_signal.created_at }}
+                        </p>
+                    {% else %}
+                        <h3>Noch kein Signal</h3>
+                        <p class="muted">Starte main.py oder klicke auf „Alle Signale aktualisieren“.</p>
+                    {% endif %}
+                </div>
+
+                {% if latest_signal %}
+                    <div class="score-badge">
+                        {{ latest_signal.signal }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if latest_signal %}
+                <div class="signal-metrics">
+                    <div>
+                        <span>Close</span>
+                        <strong>{{ "%.2f"|format(latest_signal.close) }}</strong>
+                    </div>
+
+                    <div>
+                        <span>SMA20</span>
+                        <strong>{{ "%.2f"|format(latest_signal.sma_20) }}</strong>
+                    </div>
+
+                    <div>
+                        <span>20D</span>
+                        <strong>{{ "%.2f"|format(latest_signal.change_20d_pct) }}%</strong>
+                    </div>
+                </div>
+
+                <p class="signal-reason">
+                    {{ latest_signal.reason }}
+                </p>
+            {% endif %}
+        </section>
+
+        <!-- Fundamental-Score: reiner Qualitätscheck, kein Trading-Signal -->
         <section class="score-card {{ fundamentus_score.status_class }}">
             <div class="score-header">
                 <div>
-                    <p class="eyebrow">Fundamentus Einschätzung</p>
+                    <p class="eyebrow">Fundamentaler Qualitätscheck</p>
                     <h3>{{ fundamentus_score.status }}</h3>
 
                     {% if fundamentus_score.score is not none %}
                         <p class="muted">
-                            Score: {{ fundamentus_score.score }} / {{ fundamentus_score.max_score }}
+                            Qualitäts-Score:
+                            {{ fundamentus_score.score }} / {{ fundamentus_score.max_score }}
                             · {{ "%.0f"|format(fundamentus_score.score_percent * 100) }}%
                         </p>
                     {% else %}
-                        <p class="muted">Noch nicht genug Daten vorhanden.</p>
+                        <p class="muted">Noch nicht genug Fundamentaldaten vorhanden.</p>
                     {% endif %}
                 </div>
 
@@ -144,6 +227,8 @@
             </div>
 
             <div class="score-columns">
+
+                <!-- Positive Punkte -->
                 <div>
                     <h4>Positive Punkte</h4>
 
@@ -158,6 +243,7 @@
                     {% endif %}
                 </div>
 
+                <!-- Warnhinweise -->
                 <div>
                     <h4>Warnhinweise</h4>
 
@@ -174,6 +260,7 @@
             </div>
         </section>
 
+        <!-- Jahreskennzahlen -->
         <section class="card">
             <div class="section-heading">
                 <div>
@@ -197,6 +284,7 @@
                             <th>Liabilities / Assets</th>
                         </tr>
                         </thead>
+
                         <tbody>
                         {% for item in annual_metrics %}
                             <tr>
@@ -265,13 +353,12 @@
             {% else %}
                 <p class="empty">
                     Noch keine Jahreskennzahlen vorhanden.
-                    {% if not selected_asset.cik %}
-                        Für dieses Asset ist aktuell keine SEC-CIK hinterlegt.
-                    {% endif %}
+                    Für dieses Asset liegen aktuell keine auswertbaren Jahresdaten in der verwendeten Quelle vor.
                 </p>
             {% endif %}
         </section>
 
+        <!-- Quartalskennzahlen -->
         <section class="card">
             <div class="section-heading">
                 <div>
@@ -294,6 +381,7 @@
                             <th>FCF</th>
                         </tr>
                         </thead>
+
                         <tbody>
                         {% for item in quarterly_metrics %}
                             <tr>
@@ -354,13 +442,12 @@
             {% else %}
                 <p class="empty">
                     Noch keine Quartalskennzahlen vorhanden.
-                    {% if not selected_asset.cik %}
-                        Für dieses Asset ist aktuell keine SEC-CIK hinterlegt.
-                    {% endif %}
+                    Für dieses Asset liegen aktuell keine Quartalsdaten aus der verwendeten Quelle vor.
                 </p>
             {% endif %}
         </section>
 
+        <!-- Letzte gespeicherte Kurse -->
         <section class="card">
             <div class="section-heading">
                 <div>
@@ -382,6 +469,7 @@
                             <th>Volume</th>
                         </tr>
                         </thead>
+
                         <tbody>
                         {% for price in latest_prices %}
                             <tr>

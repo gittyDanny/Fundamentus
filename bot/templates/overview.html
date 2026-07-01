@@ -9,7 +9,10 @@
 
 <div class="layout">
 
+    <!-- Linke Seitenleiste -->
     <aside class="sidebar">
+
+        <!-- Branding -->
         <div class="brand">
             <div class="brand-mark">F</div>
             <div>
@@ -18,10 +21,12 @@
             </div>
         </div>
 
+        <!-- Aktive Seite -->
         <a class="nav-link active" href="{{ url_for('overview') }}">
             Gesamtübersicht
         </a>
 
+        <!-- Globale Aktionen -->
         <form action="{{ url_for('update_all_prices') }}" method="post">
             <button class="full-button" type="submit">Alle Kurse aktualisieren</button>
         </form>
@@ -30,48 +35,57 @@
             <button class="full-button secondary" type="submit">Alle Fundamentaldaten aktualisieren</button>
         </form>
 
+        <form action="{{ url_for('update_all_signals') }}" method="post">
+            <button class="full-button secondary" type="submit">Alle Signale aktualisieren</button>
+        </form>
+
+        <!-- Watchlist -->
         <div class="watchlist">
             <h2>Watchlist</h2>
 
             {% for asset in assets %}
                 <a class="watchlist-item"
                    href="{{ url_for('asset_dashboard', ticker=asset.ticker) }}">
+
                     <span>{{ asset.ticker }}</span>
                     <small>{{ asset.name }}</small>
 
-                    {% if asset.cik %}
-                        <em>SEC aktiv</em>
-                    {% else %}
-                        <em>Nur Kurse</em>
-                    {% endif %}
+                    <!-- Datenstatus: SEC, Yahoo, SEC bereit oder nur Kurse -->
+                    <em class="data-badge {{ asset.data_status.class }}">
+                        {{ asset.data_status.label }}
+                    </em>
                 </a>
             {% endfor %}
         </div>
     </aside>
 
+    <!-- Hauptbereich -->
     <main class="content">
 
+        <!-- Header -->
         <section class="hero">
             <div>
                 <p class="eyebrow">Screener</p>
                 <h2>Fundamentus Gesamtübersicht</h2>
                 <p class="muted">
-                    Vergleich deiner Watchlist nach Kursdaten, Fundamentaldaten und Fundamentus Score.
+                    Vergleich deiner Watchlist nach Kursdaten, BUY/HOLD/SELL-Signal und Fundamentalqualität.
                 </p>
             </div>
         </section>
 
+        <!-- Meldungen -->
         {% if message %}
             <section class="message">
                 {{ message }}
             </section>
         {% endif %}
 
+        <!-- Screener-Tabelle -->
         <section class="card">
             <div class="section-heading">
                 <div>
                     <h3>Watchlist-Screener</h3>
-                    <p>Erste Bewertungsübersicht für alle beobachteten Unternehmen</p>
+                    <p>Bewertungsübersicht für alle beobachteten Unternehmen</p>
                 </div>
             </div>
 
@@ -81,26 +95,44 @@
                     <tr>
                         <th>Ticker</th>
                         <th>Name</th>
+                        <th>Daten</th>
                         <th>Region</th>
                         <th>Sektor</th>
                         <th>Kurs</th>
-                        <th>Score</th>
+                        <th>Signal</th>
+                        <th>Signal-Score</th>
+                        <th>Qualitäts-Score</th>
                         <th>Umsatz FY</th>
                         <th>Wachstum</th>
                         <th>Net Margin</th>
                         <th>FCF</th>
-                        <th>Status</th>
                         <th>Detail</th>
                     </tr>
                     </thead>
+
                     <tbody>
                     {% for row in overview_rows %}
                         <tr>
+                            <!-- Ticker -->
                             <td><strong>{{ row.ticker }}</strong></td>
+
+                            <!-- Firmenname -->
                             <td>{{ row.name }}</td>
+
+                            <!-- Datenquelle -->
+                            <td>
+                                <span class="data-table-badge {{ row.data_status.class }}">
+                                    {{ row.data_status.label }}
+                                </span>
+                            </td>
+
+                            <!-- Region -->
                             <td>{{ row.region }}</td>
+
+                            <!-- Sektor -->
                             <td>{{ row.sector }}</td>
 
+                            <!-- Letzter Kurs -->
                             <td>
                                 {% if row.latest_price %}
                                     {{ "%.2f"|format(row.latest_price.close) }} {{ row.currency }}
@@ -111,6 +143,34 @@
                                 {% endif %}
                             </td>
 
+                            <!-- BUY/HOLD/SELL -->
+                            <td>
+                                {% if row.latest_signal %}
+                                    <span class="status-pill {{ row.latest_signal.status_class }}">
+                                        {{ row.latest_signal.signal }}
+                                    </span>
+                                    <br>
+                                    <small>{{ row.latest_signal.created_at }}</small>
+                                {% else %}
+                                    n/a
+                                {% endif %}
+                            </td>
+
+                            <!-- Signal-Score aus main.py -->
+                            <td>
+                                {% if row.latest_signal %}
+                                    {{ row.latest_signal.score }}
+                                    <br>
+                                    <small>
+                                        20D:
+                                        {{ "%.2f"|format(row.latest_signal.change_20d_pct) }}%
+                                    </small>
+                                {% else %}
+                                    n/a
+                                {% endif %}
+                            </td>
+
+                            <!-- Fundamentaler Qualitäts-Score -->
                             <td>
                                 {% if row.fundamentus_score.score is not none %}
                                     {{ row.fundamentus_score.score }} / {{ row.fundamentus_score.max_score }}
@@ -121,6 +181,7 @@
                                 {% endif %}
                             </td>
 
+                            <!-- Umsatz -->
                             <td>
                                 {% if row.latest_annual_metrics and row.latest_annual_metrics.revenue %}
                                     {{ "%.2f"|format(row.latest_annual_metrics.revenue / 1000000000) }} Mrd.
@@ -131,6 +192,7 @@
                                 {% endif %}
                             </td>
 
+                            <!-- Umsatzwachstum -->
                             <td>
                                 {% if row.latest_annual_metrics and row.latest_annual_metrics.revenue_growth is not none %}
                                     {{ "%.2f"|format(row.latest_annual_metrics.revenue_growth * 100) }}%
@@ -139,6 +201,7 @@
                                 {% endif %}
                             </td>
 
+                            <!-- Net Margin -->
                             <td>
                                 {% if row.latest_annual_metrics and row.latest_annual_metrics.net_margin is not none %}
                                     {{ "%.2f"|format(row.latest_annual_metrics.net_margin * 100) }}%
@@ -147,6 +210,7 @@
                                 {% endif %}
                             </td>
 
+                            <!-- Free Cash Flow -->
                             <td>
                                 {% if row.latest_annual_metrics and row.latest_annual_metrics.free_cash_flow is not none %}
                                     {{ "%.2f"|format(row.latest_annual_metrics.free_cash_flow / 1000000000) }} Mrd.
@@ -155,12 +219,7 @@
                                 {% endif %}
                             </td>
 
-                            <td>
-                                <span class="status-pill {{ row.fundamentus_score.status_class }}">
-                                    {{ row.fundamentus_score.status }}
-                                </span>
-                            </td>
-
+                            <!-- Detail-Link -->
                             <td>
                                 <a class="detail-link" href="{{ url_for('asset_dashboard', ticker=row.ticker) }}">
                                     Öffnen
@@ -173,17 +232,19 @@
             </div>
         </section>
 
+        <!-- Hinweisbox -->
         <section class="card">
             <div class="section-heading">
                 <div>
                     <h3>Hinweis</h3>
-                    <p>Der Score ist ein einfacher Qualitätscheck, kein Kauf- oder Verkaufssignal.</p>
+                    <p>Signal-Score und Qualitäts-Score sind bewusst getrennt.</p>
                 </div>
             </div>
 
             <p class="muted">
-                US-Aktien mit CIK können aktuell über SEC CompanyFacts ausgewertet werden.
-                Deutsche Aktien werden vorerst nur mit Kursdaten angezeigt.
+                Der Signal-Score kommt aus der BUY/HOLD/SELL-Logik von main.py.
+                Der Qualitäts-Score bewertet separat die Fundamentaldaten eines Unternehmens.
+                Bei Nicht-US-Aktien wie ASML können Fundamentaldaten aus Yahoo statt SEC stammen.
             </p>
         </section>
 
