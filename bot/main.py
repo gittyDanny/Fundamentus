@@ -3,6 +3,7 @@ from app.config import load_watchlist
 from app.storage.save_assets import save_assets
 from app.jobs.price_update_job import update_daily_prices_for_assets
 from app.jobs.signal_update_job import update_signals_for_assets
+from app.firebase.bot_firebase_sync import sync_bot_data_to_firestore
 from app.reports.signal_reports import show_latest_signals
 from app.collectors.sec_ticker_mapping import resolve_ciks_for_assets
 from app.reports.console_reports import show_saved_assets
@@ -82,6 +83,36 @@ def count_price_errors(price_results):
 
     return error_count
 
+
+def print_firestore_sync_result(sync_result):
+    """
+    Gibt das Ergebnis der Firestore-Synchronisierung verständlich aus.
+    """
+    status = sync_result.get("status")
+    reason = sync_result.get("reason")
+
+    print("\nFirestore-Synchronisierung:")
+
+    if status == "success":
+        asset_count = sync_result.get("asset_documents_written", 0)
+        signal_count = sync_result.get("signal_documents_written", 0)
+        bot_status_count = sync_result.get(
+            "bot_status_documents_written",
+            0
+        )
+
+        print(f"- Assets geschrieben: {asset_count}")
+        print(f"- Signale geschrieben: {signal_count}")
+        print(f"- Bot-Status geschrieben: {bot_status_count}")
+
+    elif status == "skipped":
+        print(f"- Übersprungen: {reason}")
+
+    else:
+        error = sync_result.get("error")
+        print(f"- Fehler: {reason}")
+        print(f"- Details: {error}")
+
 def main():
     print("\nFundamentus Bot startet...")
 
@@ -151,6 +182,14 @@ def main():
         price_errors=price_errors,
         signals_saved=signal_result["saved_rows"]
     )
+
+
+    # Schritt 12: aktuelle Botdaten nach Firestore übertragen
+    # der Botlauf wird zuerst abgeschlossen, damit der neue Erfolgsstatus
+    # ebenfalls nach Firestore geschrieben werden kann
+    firestore_sync_result = sync_bot_data_to_firestore()
+
+    print_firestore_sync_result(firestore_sync_result)
 
     print("\nFundamentus Bot-Run abgeschlossen.")
     print(f"{len(assets)} Assets aus der Watchlist verarbeitet.")

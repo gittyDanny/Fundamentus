@@ -16,15 +16,9 @@ def sync_bot_data_to_firestore():
     """
     Synchronisiert die wichtigsten Botdaten nach Firestore.
 
-    Ablauf:
-    - Firestore-Client holen
-    - aktive Assets aus SQLite lesen
-    - aktuelle Signale aus SQLite lesen
-    - letzten Botlauf aus SQLite lesen
-    - alle vorbereiteten Dokumente nach Firestore schreiben
-
-    Falls Firebase noch nicht eingerichtet ist, wird die Synchronisierung
-    übersprungen. Der lokale Bot kann dadurch trotzdem normal weiterlaufen.
+    Falls Firebase nicht eingerichtet ist oder die Übertragung fehlschlägt,
+    wird ein Ergebnis-Dictionary zurückgegeben. Der lokale Botlauf soll
+    dadurch nicht abstürzen.
     """
     synced_at = get_current_utc_timestamp()
 
@@ -38,13 +32,13 @@ def sync_bot_data_to_firestore():
         "error": None
     }
 
-    db = get_firestore_client_if_configured()
-
-    if db is None:
-        result["reason"] = "Firebase ist nicht konfiguriert."
-        return result
-
     try:
+        db = get_firestore_client_if_configured()
+
+        if db is None:
+            result["reason"] = "Firebase ist nicht konfiguriert."
+            return result
+
         assets = get_active_assets_from_sqlite()
         signals = get_latest_signals_from_sqlite()
         bot_run = get_latest_bot_run_from_sqlite()
