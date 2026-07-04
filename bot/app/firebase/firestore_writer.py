@@ -1,7 +1,8 @@
 from app.firebase.firestore_formatting import build_document_id
 from app.firebase.firestore_document_builder import (
     build_asset_document,
-    build_signal_document
+    build_signal_document,
+    build_bot_status_document
 )
 
 
@@ -67,3 +68,24 @@ def write_latest_signals_to_firestore(db, signals, synced_at):
         written_count += 1
 
     return written_count
+
+
+def write_bot_status_to_firestore(db, bot_run, synced_at):
+    """
+    Schreibt den letzten Botlauf nach Firestore.
+
+    Firestore-Ziel:
+    Collection: bot_status
+    Dokument-ID: latest
+
+    Es gibt immer nur ein aktuelles Statusdokument.
+    Bei jedem Botlauf wird dieses Dokument überschrieben.
+    """
+    if bot_run is None:
+        return 0
+
+    document = build_bot_status_document(bot_run, synced_at)
+
+    db.collection("bot_status").document("latest").set(document)
+
+    return 1

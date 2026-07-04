@@ -62,3 +62,30 @@ def build_signal_document(signal, synced_at):
     }
 
     return clean_firestore_document(document)
+
+
+def build_bot_status_document(bot_run, synced_at):
+    """
+    Baut ein Firestore-Dokument für den letzten Botlauf.
+
+    Das Dokument wird später unter bot_status/latest gespeichert.
+    Die Android-App kann dadurch den aktuellen Zustand des Bots anzeigen:
+    - Zeitpunkt des letzten Laufs
+    - erfolgreicher oder fehlgeschlagener Lauf
+    - Anzahl verarbeiteter Assets
+    - Anzahl gespeicherter Signale
+    - mögliche Fehlermeldung
+    """
+    document = {
+        "runId": bot_run.get("id"),
+        "startedAt": bot_run.get("started_at"),
+        "finishedAt": bot_run.get("finished_at"),
+        "status": bot_run.get("status"),
+        "assetsProcessed": bot_run.get("assets_processed"),
+        "priceErrors": bot_run.get("price_errors"),
+        "signalsSaved": bot_run.get("signals_saved"),
+        "errorMessage": bot_run.get("error_message"),
+        "syncedAt": synced_at
+    }
+
+    return clean_firestore_document(document)
