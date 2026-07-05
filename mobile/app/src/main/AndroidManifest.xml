@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FundamentusCompanion">
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
