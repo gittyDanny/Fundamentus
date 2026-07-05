@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
+
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -41,4 +43,13 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.espresso.core
     androidTestImplementation libs.ext.junit
+
+    // Verwaltet kompatible Versionen der Firebase-Bibliotheken.
+    implementation platform('com.google.firebase:firebase-bom:34.15.0')
+
+    // Firebase Authentication für den Login.
+    implementation 'com.google.firebase:firebase-auth'
+
+    // Cloud Firestore für Signale, Assets und Nutzerdaten.
+    implementation 'com.google.firebase:firebase-firestore'
 }

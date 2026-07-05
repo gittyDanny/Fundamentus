@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "734507673144",
+    "project_id": "fundamentus-by-dio",
+    "storage_bucket": "fundamentus-by-dio.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:734507673144:android:f9cac978b2fe17e90e68cd",
+        "android_client_info": {
+          "package_name": "de.daniilioffe.fundamentus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeSsruZAO20rXD0UsENU45zTQZn74DX4g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
