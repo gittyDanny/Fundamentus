@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/menuDashboard"
+            android:title="Dashboard" />
+
+        <item
+            android:id="@+id/menuSignals"
+            android:title="Signale" />
+
+        <item
+            android:id="@+id/menuBotStatus"
+            android:title="Bot-Status" />
+
+    </group>
+
+    <item
+        android:id="@+id/menuLogout"
+        android:title="Abmelden" />
+
+</menu>

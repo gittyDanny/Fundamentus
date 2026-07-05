@@ -1,5 +1,7 @@
 package de.daniilioffe.fundamentus;
 
+import android.content.Intent;
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -84,6 +86,16 @@ public class LoginActivity extends AppCompatActivity {
                                                     Toast.LENGTH_SHORT
                                             ).show();
 
+                                            // Dashboard öffnen.
+                                            Intent intent = new Intent(
+                                                    LoginActivity.this,
+                                                    DashboardActivity.class
+                                            );
+
+                                            startActivity(intent);
+
+                                            // Login-Seite schließen, damit man nicht zurückspringen kann.
+                                            finish();
                                         } else {
 
                                             Toast.makeText(
