@@ -1,14 +1,13 @@
 package de.daniilioffe.fundamentus;
-
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import android.content.Intent;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -16,94 +15,98 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class LoginActivity extends AppCompatActivity {
+//Quasi die MainActivity, aber ich wollte alle Activities nach Funktion nennen
 
-    // Verbindung zu Firebase Authentication.
-    private FirebaseAuth firebaseAuth;
+public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // DIESE ZWEI ZEILEN NICHT ÄNDERN!
         super.onCreate(savedInstanceState);
-
-        // Verbindet die Activity mit der XML-Oberfläche.
         setContentView(R.layout.activity_login);
+        //sorry, ich habs umbenannt
 
-        // Firebase Authentication vorbereiten.
-        firebaseAuth = FirebaseAuth.getInstance();
 
-        // Eingabefelder und Button aus der XML-Datei laden.
-        EditText inputEmail =
-                findViewById(R.id.inputEmail);
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
-        EditText inputPassword =
-                findViewById(R.id.inputPassword);
 
-        Button buttonLogin =
-                findViewById(R.id.buttonLogin);
+        EditText inputEmail = findViewById(R.id.inputEmail);
 
-        // Reagiert auf einen Klick auf den Login-Button.
+
+        EditText inputPassword = findViewById(R.id.inputPassword);
+
+
+        final Button buttonLogin = findViewById(R.id.buttonLogin);
+
+
         buttonLogin.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
 
-                // Eingaben auslesen.
-                String email =
-                        inputEmail.getText().toString().trim();
+                String email = inputEmail.getText().toString().trim();
 
-                String password =
-                        inputPassword.getText().toString();
+                String password = inputPassword.getText().toString();
 
-                // Leere Eingabefelder verhindern.
-                if (email.isEmpty() || password.isEmpty()) {
+                if (email.isEmpty()) {
 
                     Toast.makeText(
                             LoginActivity.this,
-                            "Bitte E-Mail-Adresse und Passwort eingeben.",
+                            "Bitte E-Mail-Adresse eingeben.",
                             Toast.LENGTH_SHORT
                     ).show();
 
                     return;
                 }
 
-                // E-Mail und Passwort an Firebase übergeben.
+                if (password.isEmpty()) {
+
+                    Toast.makeText(
+                            LoginActivity.this,
+                            "Bitte Passwort eingeben.",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    return;
+                }
+
                 firebaseAuth
                         .signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(
-                                LoginActivity.this,
-                                new OnCompleteListener<AuthResult>() {
+
+                        .addOnSuccessListener(
+                                new OnSuccessListener<AuthResult>() {
 
                                     @Override
-                                    public void onComplete(
-                                            @NonNull Task<AuthResult> task
-                                    ) {
+                                    public void onSuccess(AuthResult authResult) {
 
-                                        if (task.isSuccessful()) {
+                                        Toast.makeText(
+                                                LoginActivity.this,
+                                                "Login erfolgreich.",
+                                                Toast.LENGTH_SHORT
+                                        ).show();
 
-                                            Toast.makeText(
-                                                    LoginActivity.this,
-                                                    "Login erfolgreich.",
-                                                    Toast.LENGTH_SHORT
-                                            ).show();
+                                        Intent intent = new Intent(
+                                                LoginActivity.this,
+                                                DashboardActivity.class
+                                        );
 
-                                            // Dashboard öffnen.
-                                            Intent intent = new Intent(
-                                                    LoginActivity.this,
-                                                    DashboardActivity.class
-                                            );
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                }
+                        )
 
-                                            startActivity(intent);
+                        .addOnFailureListener(
+                                new OnFailureListener() {
 
-                                            // Login-Seite schließen, damit man nicht zurückspringen kann.
-                                            finish();
-                                        } else {
+                                    @Override
+                                    public void onFailure(Exception exception) {
 
-                                            Toast.makeText(
-                                                    LoginActivity.this,
-                                                    "Login fehlgeschlagen.",
-                                                    Toast.LENGTH_SHORT
-                                            ).show();
-                                        }
+                                        Toast.makeText(
+                                                LoginActivity.this,
+                                                "Login fehlgeschlagen.",
+                                                Toast.LENGTH_SHORT
+                                        ).show();
                                     }
                                 }
                         );

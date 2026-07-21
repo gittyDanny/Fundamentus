@@ -1,26 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginTop="25dp"
     android:orientation="vertical"
-    android:gravity="center_horizontal"
-    android:padding="32dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="83dp"
+        android:layout_height="86dp"
+        android:layout_gravity="right"
+        app:srcCompat="@drawable/fundamentus_logo" />
 
     <TextView
         android:id="@+id/textTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="41dp"
         android:layout_marginTop="80dp"
         android:text="Fundamentus Companion"
-        android:textAlignment="center"
         android:textSize="28sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/textSubtitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
         android:layout_marginTop="12dp"
         android:text="Mit deinem Konto anmelden"
         android:textAlignment="center"
@@ -28,27 +35,37 @@
 
     <EditText
         android:id="@+id/inputEmail"
-        android:layout_width="match_parent"
+        android:layout_width="334dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="48dp"
         android:hint="E-Mail-Adresse"
         android:inputType="textEmailAddress"
-        android:singleLine="true" />
+        android:minHeight="48dp"
+        android:padding="12dp" />
 
     <EditText
         android:id="@+id/inputPassword"
-        android:layout_width="match_parent"
+        android:layout_width="334dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="Passwort"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="48dp"
+        android:hint="password"
         android:inputType="textPassword"
-        android:singleLine="true" />
+        android:minHeight="48dp"
+        android:padding="12dp" />
 
     <Button
         android:id="@+id/buttonLogin"
-        android:layout_width="match_parent"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="334dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Anmelden" />
+        android:layout_gravity="center_horizontal"
+        android:backgroundTint="#00B6BA"
+        android:backgroundTintMode="screen"
+        android:text="Anmelden"
+        android:textColor="#FFFFFF" />
+
 
 </LinearLayout>
