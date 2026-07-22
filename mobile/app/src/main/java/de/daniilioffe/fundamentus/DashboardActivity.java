@@ -44,10 +44,10 @@ public class DashboardActivity extends AppCompatActivity {
         NavigationView navigationView = findViewById(R.id.navigationView);
 
 
-        NavigationView.OnNavigationItemSelectedListener menuItem = new NavigationView.OnNavigationItemSelectedListener() {
+        NavigationView.OnNavigationItemSelectedListener navigationListener = new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-                if(menuItem.getItemId()  == R.id.menuLogout){
+                if (menuItem.getItemId() == R.id.menuLogout) {
                     Intent logoutIntent = new Intent(DashboardActivity.this, LoginActivity.class);
                     startActivity(logoutIntent);
                     FirebaseAuth.getInstance().signOut();
@@ -56,11 +56,22 @@ public class DashboardActivity extends AppCompatActivity {
                     return true;
 
                 }
-                return false;}
-            };
 
 
-        navigationView.setNavigationItemSelectedListener(menuItem);
+                if (menuItem.getItemId() == R.id.menuStocks) {
+                    Intent goToStocksIntent = new Intent(DashboardActivity.this, StocksActivity.class);
+                    startActivity(goToStocksIntent);
+                    return true;
+                }
+                return false;
+            }
+
+
+        };
+
+        navigationView.setNavigationItemSelectedListener(navigationListener);
+
+
 
     }
 

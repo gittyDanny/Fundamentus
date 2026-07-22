@@ -8,12 +8,18 @@
             android:title="Dashboard" />
 
         <item
+            android:id="@+id/menuStocks"
+            android:title="Stocks" />
+
+        <item
             android:id="@+id/menuSignals"
             android:title="Signale" />
 
         <item
             android:id="@+id/menuBotStatus"
             android:title="Bot-Status" />
+
+
 
     </group>
 
