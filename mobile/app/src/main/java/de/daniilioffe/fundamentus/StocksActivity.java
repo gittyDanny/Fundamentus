@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,16 +18,21 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
+
 
 public class StocksActivity extends AppCompatActivity {
-    public ArrayList<String> stocks = new ArrayList<>();
+
 
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_stocks);
-        LinearLayout stockContainer = findViewById(R.id.stockContainer);
+        LinearLayout aktieLayout = findViewById(R.id.stockContainer);
+
+        EditText suchText;
+        suchText = findViewById(R.id.suchTextEingabe);
+
 
         //firebase Connection anlegen
         FirebaseFirestore databaseCon = FirebaseFirestore.getInstance();
@@ -46,34 +53,22 @@ public class StocksActivity extends AppCompatActivity {
                             return;
                         }
 
-                        QuerySnapshot stockData;
-                        stockData = task.getResult();
+                        QuerySnapshot assetsTabelle;
+                        assetsTabelle = task.getResult();
 
-                        LayoutInflater newStock;
-                        newStock = getLayoutInflater();
                         //Aktienzeile für jede Aktie
-                        for (QueryDocumentSnapshot stockDok : stockData) {
-
-                            String ticker;
-                            ticker = stockDok.getString("ticker");
+                        showStocks(assetsTabelle,aktieLayout,"");
 
 
-                            View stockRow;
-                            stockRow = newStock.inflate(
-                                    R.layout.item_stock,
-                                    stockContainer,
-                                    false
-                            );
+                        Button suchButton = findViewById(R.id.aktienSucheButton);
 
-                            TextView tickerTextView;
-                            tickerTextView = stockRow.findViewById(
-                                    R.id.textStockTicker
-                            );
-
-                            tickerTextView.setText(ticker);
-
-                            stockContainer.addView(stockRow);
-                        }
+                        suchButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View gesucht) {
+                                String suchTextString = suchText.getText().toString();
+                                showStocks(assetsTabelle,aktieLayout,suchTextString);
+                            }
+                        });
 
 
                     }
@@ -81,5 +76,57 @@ public class StocksActivity extends AppCompatActivity {
 
         );
 
+
+
+
+
     }
+    private void showStocks(QuerySnapshot assetsTabelle, LinearLayout aktieLayout, String suchText){
+        aktieLayout.removeAllViews();
+
+        String eingegebenerSuchtext = suchText.trim().toLowerCase();
+
+        LayoutInflater neueAktie = getLayoutInflater();
+
+        for(QueryDocumentSnapshot assetsDatensatz : assetsTabelle){
+            String ticker = assetsDatensatz.getString("ticker");
+            String name  = assetsDatensatz.getString("name");
+            String sector = assetsDatensatz.getString("sector");
+
+            if (ticker == null){
+                ticker = "";
+            }
+            if (name == null){
+                name = "";
+            }
+            if (sector == null){
+                sector = "";
+            }
+
+            boolean tickerWirdGesucht = ticker.toLowerCase().contains(eingegebenerSuchtext);
+            boolean nameWirdGesucht = name.toLowerCase().contains(eingegebenerSuchtext);
+            boolean sectorWirdGesucht = sector.toLowerCase().contains(eingegebenerSuchtext);
+
+            if(tickerWirdGesucht == true || nameWirdGesucht == true || sectorWirdGesucht == true){
+                View aktienKachel;
+                aktienKachel =  neueAktie.inflate(R.layout.item_aktie,aktieLayout,false);
+
+                TextView tickerTextView;
+                tickerTextView = aktienKachel.findViewById(R.id.tickerAnzeigeText);
+                tickerTextView.setText(ticker);
+                TextView nameTextView;
+                nameTextView = aktienKachel.findViewById(R.id.nameAnzeigeText);
+                nameTextView.setText(name);
+                TextView sectorTextView;
+                sectorTextView = aktienKachel.findViewById(R.id.sectorAnzeigeText);
+                sectorTextView.setText(sector);
+
+                aktieLayout.addView(aktienKachel);
+            }
+
+        }
+
+
+    }
+
 }

@@ -21,14 +21,14 @@
         android:textSize="26sp" />
 
     <EditText
-        android:id="@+id/inputStockSearch"
+        android:id="@+id/suchTextEingabe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Ticker oder Unternehmen suchen"
         android:inputType="text" />
 
     <Button
-        android:id="@+id/buttonSearchStocks"
+        android:id="@+id/aktienSucheButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Suchen" />

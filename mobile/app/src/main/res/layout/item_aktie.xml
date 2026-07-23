@@ -8,20 +8,20 @@
 
 
     <TextView
-        android:id="@+id/textStockTicker"
+        android:id="@+id/tickerAnzeigeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
         android:textSize="22sp" />
 
     <TextView
-        android:id="@+id/textStockName"
+        android:id="@+id/nameAnzeigeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="" />
 
     <TextView
-        android:id="@+id/textStockIndustry"
+        android:id="@+id/sectorAnzeigeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="" />
