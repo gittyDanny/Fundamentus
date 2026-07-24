@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -103,6 +104,8 @@ public class StocksActivity extends AppCompatActivity {
                 sector = "";
             }
 
+            String tickerFuerDetails = ticker;
+
             boolean tickerWirdGesucht = ticker.toLowerCase().contains(eingegebenerSuchtext);
             boolean nameWirdGesucht = name.toLowerCase().contains(eingegebenerSuchtext);
             boolean sectorWirdGesucht = sector.toLowerCase().contains(eingegebenerSuchtext);
@@ -110,6 +113,8 @@ public class StocksActivity extends AppCompatActivity {
             if(tickerWirdGesucht == true || nameWirdGesucht == true || sectorWirdGesucht == true){
                 View aktienKachel;
                 aktienKachel =  neueAktie.inflate(R.layout.item_aktie,aktieLayout,false);
+
+
 
                 TextView tickerTextView;
                 tickerTextView = aktienKachel.findViewById(R.id.tickerAnzeigeText);
@@ -120,6 +125,20 @@ public class StocksActivity extends AppCompatActivity {
                 TextView sectorTextView;
                 sectorTextView = aktienKachel.findViewById(R.id.sectorAnzeigeText);
                 sectorTextView.setText(sector);
+
+                Button detailsButton;
+                detailsButton = aktienKachel.findViewById(
+                        R.id.buttonAktieDetails
+                );
+                detailsButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View angeclickterButton) {
+                        Intent detailsIntent;
+                        detailsIntent = new Intent(StocksActivity.this, AktienDetailsActivity.class);
+                        detailsIntent.putExtra("ticker", tickerFuerDetails);
+                        startActivity(detailsIntent);
+                    }
+                });
 
                 aktieLayout.addView(aktienKachel);
             }
