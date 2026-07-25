@@ -51,7 +51,7 @@ public class AktienDetailsActivity extends AppCompatActivity {
                         }
                         DocumentSnapshot signalDatensatz = task.getResult();
                         if (!signalDatensatz.exists()) {
-                            signalTextView.setText("Kein Signal vorhande");
+                            signalTextView.setText("Kein Signal vorhanden.");
                             Toast.makeText(AktienDetailsActivity.this, "für" + ticker + "wurde noch kein Signal gespeichert", Toast.LENGTH_SHORT).show();
 
                             return;

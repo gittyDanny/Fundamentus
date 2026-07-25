@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/imageView"
@@ -34,14 +34,16 @@
         android:text="Suchen" />
 
     <Spinner
-        android:id="@+id/spinnerIndustry"
+        android:id="@+id/spinnerSectorFilter"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:entries="@array/sector_filter_auswahl" />
 
     <Spinner
         android:id="@+id/spinnerWatchlistFilter"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:entries="@array/watchlist_filter_auswahl" />
 
     <ScrollView
         android:layout_width="match_parent"

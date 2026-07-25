@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,51 +43,86 @@ public class StocksActivity extends AppCompatActivity {
         EditText suchText;
         suchText = findViewById(R.id.suchTextEingabe);
 
+        Spinner sectorFilter;
+        sectorFilter = findViewById(R.id.spinnerSectorFilter);
+
+        Spinner watchlistFilter;
+        watchlistFilter = findViewById(R.id.spinnerWatchlistFilter);
+
 
         //firebase Connection anlegen
         FirebaseFirestore databaseCon = FirebaseFirestore.getInstance();
-        //Tabelle assets speichert die YML Einträge aus dem Bot - die wollen wir haben
+        //Tabelle assets speichert die YML Einträge aus dem Bot
         databaseCon.collection("assets").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                                         @Override
-                                                                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                                             if (!task.isSuccessful()) {
-                                                                                 Toast.makeText(StocksActivity.this, "Daten konnten nicht geladen werden", Toast.LENGTH_SHORT).show();
-                                                                                 Exception fehler = task.getException();
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (!task.isSuccessful()) {
+                    Toast.makeText(StocksActivity.this, "Daten konnten nicht geladen werden", Toast.LENGTH_SHORT).show();
+                    Exception fehler = task.getException();
 
-                                                                                 Log.e("FIRESTORE", "assets konnten nicht geladen werden", fehler);
-                                                                                 return;
-                                                                             }
+                    Log.e("FIRESTORE", "assets konnten nicht geladen werden", fehler);
+                    return;
+                }
 
-                                                                             QuerySnapshot assetsTabelle;
-                                                                             assetsTabelle = task.getResult();
+                QuerySnapshot assetsTabelle;
+                assetsTabelle = task.getResult();
 
-                                                                             //Aktienzeile für jede Aktie
-                                                                             showStocks(assetsTabelle, aktieLayout, "");
+                FirebaseUser aktuellerNutzer;
+                aktuellerNutzer = FirebaseAuth.getInstance().getCurrentUser();
 
+                if (aktuellerNutzer == null) {
+                    Toast.makeText(StocksActivity.this, "Kein Nutzer angemeldet", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                                                                             Button suchButton = findViewById(R.id.aktienSucheButton);
+                String userID = aktuellerNutzer.getUid();
 
-                                                                             suchButton.setOnClickListener(new View.OnClickListener() {
-                                                                                 @Override
-                                                                                 public void onClick(View gesucht) {
-                                                                                     String suchTextString = suchText.getText().toString();
-                                                                                     showStocks(assetsTabelle, aktieLayout, suchTextString);
-                                                                                 }
-                                                                             });
+                DocumentReference nutzerTabelle;
+                nutzerTabelle = databaseCon.collection("users").document(userID);
 
+                nutzerTabelle.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> watchlistAbholen) {
+                        if (!watchlistAbholen.isSuccessful()) {
+                            Toast.makeText(StocksActivity.this, "Watchliste konnte nicht geladen werden", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        DocumentSnapshot nutzerDatensatz;
+                        nutzerDatensatz = watchlistAbholen.getResult();
 
-                                                                         }
-                                                                     }
+                        ArrayList<String> abgeholteWatchlist;
 
-        );
+                        if (nutzerDatensatz == null || nutzerDatensatz.get("watchlist") == null) {
+                            abgeholteWatchlist = new ArrayList<>();
+                        } else {
+                            abgeholteWatchlist = (ArrayList<String>) nutzerDatensatz.get("watchllist");
+                        }
+                        showStocks(assetsTabelle, aktieLayout, "", "Alle Sektoren", "Alle Aktien", abgeholteWatchlist);
+                        Button suchButton = findViewById(R.id.aktienSucheButton);
+
+                        suchButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View gesucht) {
+                                String suchTextString = suchText.getText().toString();
+                                String ausgewählterSector = sectorFilter.getSelectedItem().toString();
+                                String obWatchlistFilter = watchlistFilter.getSelectedItem().toString();
+                                showStocks(assetsTabelle, aktieLayout, suchTextString, ausgewählterSector, obWatchlistFilter, abgeholteWatchlist);
+                            }
+                        });
+                    }
+                });
+
+            }
+        });
 
 
     }
 
-    private void showStocks(QuerySnapshot assetsTabelle, LinearLayout aktieLayout, String suchText) {
+    private void showStocks(QuerySnapshot assetsTabelle, LinearLayout aktieLayout, String suchText, String sectorFilter, String watchlistFilter, ArrayList<String> watchlist) {
         aktieLayout.removeAllViews();
 
         String eingegebenerSuchtext = suchText.trim().toLowerCase();
+
 
         LayoutInflater neueAktie = getLayoutInflater();
 
@@ -120,11 +156,26 @@ public class StocksActivity extends AppCompatActivity {
 
             String tickerFuerDetails = ticker;
 
+            boolean istWatchlisted;
+            boolean watchlistPasst;
+            istWatchlisted = watchlist.contains(ticker);
+            if ((watchlistFilter.equals("Alle Aktien"))) {
+                watchlistPasst = true;
+            } else {
+                watchlistPasst = istWatchlisted;
+            }
             boolean tickerWirdGesucht = ticker.toLowerCase().contains(eingegebenerSuchtext);
             boolean nameWirdGesucht = name.toLowerCase().contains(eingegebenerSuchtext);
             boolean sectorWirdGesucht = sector.toLowerCase().contains(eingegebenerSuchtext);
+            boolean sectorPasst;
 
-            if (tickerWirdGesucht || nameWirdGesucht || sectorWirdGesucht) {
+            if (sectorFilter.equals("Alle Sektoren")) {
+                sectorPasst = true;
+            } else {
+                sectorPasst = sector.equals(sectorFilter);
+            }
+
+            if ((tickerWirdGesucht || nameWirdGesucht || sectorWirdGesucht) && sectorPasst && watchlistPasst) {
                 View aktienKachel;
                 aktienKachel = neueAktie.inflate(R.layout.item_aktie, aktieLayout, false);
 
@@ -146,61 +197,24 @@ public class StocksActivity extends AppCompatActivity {
                 DocumentReference watchlistTabelle;
 
                 watchlistTabelle = datenbankVerbindung.collection("users").document(userID);
-                watchlistSwitch.setEnabled(false);
+                watchlistSwitch.setChecked(istWatchlisted);
+                watchlistSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                                               @Override
+                                                               public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
+                                                                   if (isChecked){
+                                                                       watchlistTabelle.update("watchlist", FieldValue.arrayUnion(tickerFuerWatchlist));
+                                                                       if (watchlist.contains(tickerFuerWatchlist) == false){
+                                                                           watchlist.add(tickerFuerWatchlist);
+                                                                       }
+                                                                   }else{
+                                                                       watchlistTabelle.update("watchlist",FieldValue.arrayRemove(tickerFuerWatchlist));
+                                                                       watchlist.remove(tickerFuerWatchlist);
+                                                                   }
 
-                watchlistTabelle.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                               }
+                                                           }
+                );
 
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-
-                        if (!task.isSuccessful()) {
-
-                            Toast.makeText(StocksActivity.this, "Watchlist konnte nicht geladen werden.", Toast.LENGTH_SHORT).show();
-
-                            return;
-                        }
-
-                        DocumentSnapshot watchlistDatensatz;
-                        watchlistDatensatz = task.getResult();
-
-                        if (watchlistDatensatz == null) {
-                            watchlistSwitch.setEnabled(true);
-                            return;
-                        }
-
-                        ArrayList<String> watchlist = (ArrayList<String>) watchlistDatensatz.get("watchlist");
-
-                        if (watchlist == null) {
-                            watchlist = new ArrayList<>();
-                        }
-
-
-                        watchlistSwitch.setChecked(watchlist.contains(tickerFuerWatchlist));
-
-                        watchlistSwitch.setEnabled(true);
-
-                        watchlistSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-                            @Override
-                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                                if (isChecked) {
-
-                                    watchlistTabelle.update("watchlist", FieldValue.arrayUnion(tickerFuerWatchlist));
-                                } else {
-
-                                    watchlistTabelle.update("watchlist", FieldValue.arrayRemove(tickerFuerWatchlist));
-                                }
-
-
-                            }
-
-
-                        });
-                    }
-
-
-                });
                 Button detailsButton;
 
                 detailsButton = aktienKachel.findViewById(R.id.buttonAktieDetails);
