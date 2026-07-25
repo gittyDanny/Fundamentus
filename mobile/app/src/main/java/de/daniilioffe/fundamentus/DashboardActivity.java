@@ -72,12 +72,7 @@ public class DashboardActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(navigationListener);
 
 
-
     }
-
-
-
-
 
 
 }

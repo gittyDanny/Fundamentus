@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.Firebase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -33,8 +32,8 @@ public class AktienDetailsActivity extends AppCompatActivity {
         Intent detailsIntent = getIntent();
         String ticker = detailsIntent.getStringExtra("ticker");
 
-        if(ticker == null || ticker.isEmpty()){
-            Toast.makeText(AktienDetailsActivity.this,"Kein Ticker womp womp",Toast.LENGTH_SHORT).show();
+        if (ticker == null || ticker.isEmpty()) {
+            Toast.makeText(AktienDetailsActivity.this, "Kein Ticker womp womp", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -45,13 +44,13 @@ public class AktienDetailsActivity extends AppCompatActivity {
                 new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if(task.isSuccessful() == false){
-                            Log.e("FIRESTORE","Signal konnte nicht geladen werden", task.getException());
-                            Toast.makeText(AktienDetailsActivity.this,"Signal konnte nicht geladen werden",Toast.LENGTH_SHORT).show();
+                        if (!task.isSuccessful()) {
+                            Log.e("FIRESTORE", "Signal konnte nicht geladen werden", task.getException());
+                            Toast.makeText(AktienDetailsActivity.this, "Signal konnte nicht geladen werden", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         DocumentSnapshot signalDatensatz = task.getResult();
-                        if (signalDatensatz.exists() == false){
+                        if (!signalDatensatz.exists()) {
                             signalTextView.setText("Kein Signal vorhande");
                             Toast.makeText(AktienDetailsActivity.this, "für" + ticker + "wurde noch kein Signal gespeichert", Toast.LENGTH_SHORT).show();
 
@@ -59,43 +58,49 @@ public class AktienDetailsActivity extends AppCompatActivity {
 
                         }
 
-                        String signal= signalDatensatz.getString("signal");
+                        String signal = signalDatensatz.getString("signal");
                         String reason = signalDatensatz.getString("reason");
                         Double score = signalDatensatz.getDouble("score");
                         Double close = signalDatensatz.getDouble("close");
                         Double sma20 = signalDatensatz.getDouble("sma20");
                         Double change20dPct = signalDatensatz.getDouble("change20dPct");
 
-                        if(signal == null){
-                            signal = "Unbekannt";}
-                        if (reason == null){
-                            reason = "Keine Begründung vorhanden";}
+                        if (signal == null) {
+                            signal = "Unbekannt";
+                        }
+                        if (reason == null) {
+                            reason = "Keine Begründung vorhanden";
+                        }
 
                         signalTextView.setText("Signal: " + signal);
                         reasonTextView.setText("Begründung: " + reason);
 
                         if (score == null) {
                             scoreTextView.setText("Score: -");
-                        } else {scoreTextView.setText("Score: " + score);}
+                        } else {
+                            scoreTextView.setText("Score: " + score);
+                        }
                         if (close == null) {
                             closeTextView.setText("Letzter Kurs: -");
-                        } else {closeTextView.setText("Letzter Kurs: " + close);}
+                        } else {
+                            closeTextView.setText("Letzter Kurs: " + close);
+                        }
                         if (sma20 == null) {
                             sma20TextView.setText("SMA20: -");
-                        } else {sma20TextView.setText("SMA20: " + sma20);}
+                        } else {
+                            sma20TextView.setText("SMA20: " + sma20);
+                        }
                         if (change20dPct == null) {
                             change20dTextView.setText("20-Tage-Änderung: -");
-                        } else {change20dTextView.setText("20-Tage-Änderung: " + change20dPct + " %");
+                        } else {
+                            change20dTextView.setText("20-Tage-Änderung: " + change20dPct + " %");
                         }
-                        Toast.makeText(AktienDetailsActivity.this,"Signal erfolgreich geladen",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AktienDetailsActivity.this, "Signal erfolgreich geladen", Toast.LENGTH_SHORT).show();
 
 
                     }
                 }
         );
-
-
-
 
 
         tickerTextView.setText(ticker);
