@@ -13,5 +13,11 @@
         <item>Nur Watchlist</item>
     </string-array>
 
+    <string-array name="broker_auswahl">
+        <item>Bitpanda</item>
+        <item>Trade Republic</item>
+        <item>Scalable Capital</item>
+    </string-array>
+
 
 </resources>

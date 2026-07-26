@@ -3,6 +3,9 @@ package de.daniilioffe.fundamentus;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.animation.TranslateAnimation;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +31,8 @@ public class AktienDetailsActivity extends AppCompatActivity {
         TextView closeTextView = findViewById(R.id.detailsCloseText);
         TextView sma20TextView = findViewById(R.id.detailsSma20Text);
         TextView change20dTextView = findViewById(R.id.detailsChange20dText);
+        Button tradeErstellenButton = findViewById(R.id.buttonPaperTradeErstellen);
+
 
         Intent detailsIntent = getIntent();
         String ticker = detailsIntent.getStringExtra("ticker");
@@ -77,8 +82,27 @@ public class AktienDetailsActivity extends AppCompatActivity {
 
                         if (score == null) {
                             scoreTextView.setText("Score: -");
+                            tradeErstellenButton.setEnabled(false);
                         } else {
                             scoreTextView.setText("Score: " + score);
+                            tradeErstellenButton.setEnabled(true);
+
+                            tradeErstellenButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                    Intent tradeErstellenIntent;
+                                    tradeErstellenIntent = new Intent(AktienDetailsActivity.this, TradeErstellenActivity.class);
+
+                                    tradeErstellenIntent.putExtra("ticker",ticker);
+                                    tradeErstellenIntent.putExtra("score",score);
+                                    startActivity(tradeErstellenIntent);
+
+
+                                }
+                            });
+
+
                         }
                         if (close == null) {
                             closeTextView.setText("Letzter Kurs: -");
@@ -95,6 +119,11 @@ public class AktienDetailsActivity extends AppCompatActivity {
                         } else {
                             change20dTextView.setText("20-Tage-Änderung: " + change20dPct + " %");
                         }
+
+
+
+
+
                         Toast.makeText(AktienDetailsActivity.this, "Signal erfolgreich geladen", Toast.LENGTH_SHORT).show();
 
 

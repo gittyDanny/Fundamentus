@@ -95,7 +95,7 @@ public class StocksActivity extends AppCompatActivity {
                         if (nutzerDatensatz == null || nutzerDatensatz.get("watchlist") == null) {
                             abgeholteWatchlist = new ArrayList<>();
                         } else {
-                            abgeholteWatchlist = (ArrayList<String>) nutzerDatensatz.get("watchllist");
+                            abgeholteWatchlist = (ArrayList<String>) nutzerDatensatz.get("watchlist");
                         }
                         showStocks(assetsTabelle, aktieLayout, "", "Alle Sektoren", "Alle Aktien", abgeholteWatchlist);
                         Button suchButton = findViewById(R.id.aktienSucheButton);

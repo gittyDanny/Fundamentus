@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/tradeTickerText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tradeScoreText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/inputKaufpreis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:hint="Tatsächlicher Kaufpreis"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/inputAnzahl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Anzahl der Anteile"
+            android:inputType="numberDecimal" />
+
+        <Spinner
+            android:id="@+id/spinnerBroker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/broker_auswahl" />
+
+        <TextView
+            android:id="@+id/textKostenVorschau"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Gesamteinsatz: -"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/buttonTradeSpeichern"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Offenen Trade speichern" />
+
+    </LinearLayout>
+
+</ScrollView>
