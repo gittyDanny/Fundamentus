@@ -3,6 +3,7 @@ package de.daniilioffe.fundamentus;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,9 +13,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -27,6 +31,60 @@ public class TradeErstellenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trade_erstellen);
+
+        DrawerLayout drawerLayout = findViewById(R.id.drawerLayout);
+
+        Button buttonOpenMenu;
+        buttonOpenMenu = findViewById(R.id.buttonOpenMenu);
+
+        NavigationView navigationView;
+        navigationView = findViewById(R.id.navigationView);
+
+        buttonOpenMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+
+            }
+        });
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                if (menuItem.getItemId() == R.id.menuDashboard) {
+                    Intent dashboardIntent;
+                    dashboardIntent = new Intent(TradeErstellenActivity.this, DashboardActivity.class);
+                    startActivity(dashboardIntent);
+                    finish();
+                    return true;
+                } else if (menuItem.getItemId() == R.id.menuStocks) {
+                    Intent stocksIntent;
+                    stocksIntent = new Intent(TradeErstellenActivity.this, StocksActivity.class);
+                    startActivity(stocksIntent);
+                    finish();
+                    return true;
+                } else if (menuItem.getItemId() == R.id.menuLogout) {
+                    Intent logoutIntent;
+                    logoutIntent = new Intent(TradeErstellenActivity.this, LoginActivity.class);
+                    FirebaseAuth.getInstance().signOut();
+                    startActivity(logoutIntent);
+                    Toast.makeText(TradeErstellenActivity.this, "logout erfolgreich", Toast.LENGTH_SHORT).show();
+
+                    finish();
+                    return true;
+
+                } else if (menuItem.getItemId() == R.id.menuTrades) {
+                    Intent tradesIntent;
+                    tradesIntent = new Intent(TradeErstellenActivity.this, TradesActivity.class);
+                    startActivity(tradesIntent);
+
+                    finish();
+                    return true;
+
+                }
+                return false;
+            }
+        });
 
         TextView tickerTextView = findViewById(R.id.tradeTickerText);
         TextView scoreTextView = findViewById(R.id.tradeScoreText);
@@ -131,7 +189,7 @@ public class TradeErstellenActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<DocumentReference> tradeSpeichern) {
                 if (tradeSpeichern.isSuccessful() == false) {
                     Toast.makeText(TradeErstellenActivity.this, "Position wurde nicht gespeichert", Toast.LENGTH_SHORT).show();
-                    Log.e("FIRESTORE","Position konnte nicht gespeichert werden",tradeSpeichern.getException());
+                    Log.e("FIRESTORE", "Position konnte nicht gespeichert werden", tradeSpeichern.getException());
                     return;
                 }
                 Toast.makeText(TradeErstellenActivity.this, "Position gespeichert.", Toast.LENGTH_SHORT).show();

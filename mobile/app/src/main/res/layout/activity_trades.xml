@@ -8,15 +8,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".StocksActivity"
+    tools:context=".TradesActivity"
     tools:openDrawer="start">
 
+    <!-- Normaler Inhalt der TradesActivity -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Menü -->
+        <!-- Obere Menüleiste -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,75 +48,33 @@
 
         </LinearLayout>
 
-        <!-- Suche/Filterinhos -->
+        <!-- Inhalt der Trades-Seite -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingTop="12dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="12dp">
+            android:padding="20dp">
 
             <TextView
-                android:id="@+id/textStocksTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Stocks"
-                android:textSize="26sp"
+                android:text="Offene Trades"
+                android:textSize="30sp"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/suchTextEingabe"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tradesStatusText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="Ticker oder Unternehmen suchen"
-                android:inputType="text" />
-
-            <Button
-                android:id="@+id/aktienSucheButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Suchen" />
-
-            <Spinner
-                android:id="@+id/spinnerSectorFilter"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:entries="@array/sector_filter_auswahl" />
-
-            <Spinner
-                android:id="@+id/spinnerWatchlistFilter"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:entries="@array/watchlist_filter_auswahl" />
+                android:layout_marginTop="20dp"
+                android:text="Trades werden geladen..."
+                android:textSize="18sp" />
 
         </LinearLayout>
 
-        <!-- Aktienübersicht -->
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:fillViewport="true">
-
-            <LinearLayout
-                android:id="@+id/stockContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingBottom="20dp" />
-
-        </ScrollView>
-
     </LinearLayout>
 
-    <!-- Navigationsmenü -->
+    <!-- Seitliches Navigationsmenü -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="300dp"

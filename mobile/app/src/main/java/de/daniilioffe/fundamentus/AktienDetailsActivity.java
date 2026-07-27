@@ -3,8 +3,8 @@ package de.daniilioffe.fundamentus;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,9 +12,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -23,6 +27,68 @@ public class AktienDetailsActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_aktie_details);
+
+        DrawerLayout drawerLayout = findViewById(R.id.drawerLayout);
+
+        Button buttonOpenMenu;
+        buttonOpenMenu = findViewById(R.id.buttonOpenMenu);
+
+        NavigationView navigationView;
+        navigationView = findViewById(R.id.navigationView);
+
+        buttonOpenMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+
+            }
+        });
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                if (menuItem.getItemId() == R.id.menuDashboard) {
+                    Intent dashboardIntent;
+                    dashboardIntent = new Intent(AktienDetailsActivity.this, DashboardActivity.class);
+                    startActivity(dashboardIntent);
+                    finish();
+                    return true;
+                } else if (menuItem.getItemId() == R.id.menuStocks) {
+                    Intent stocksIntent;
+                    stocksIntent = new Intent(AktienDetailsActivity.this, StocksActivity.class);
+                    startActivity(stocksIntent);
+                    finish();
+                    return true;
+                } else if (menuItem.getItemId() == R.id.menuLogout) {
+                    Intent logoutIntent;
+                    logoutIntent = new Intent(AktienDetailsActivity.this, LoginActivity.class);
+                    FirebaseAuth.getInstance().signOut();
+                    startActivity(logoutIntent);
+                    Toast.makeText(AktienDetailsActivity.this, "logout erfolgreich", Toast.LENGTH_SHORT).show();
+
+                    finish();
+                    return true;
+
+                } else if (menuItem.getItemId() == R.id.menuTrades) {
+                    Intent tradesIntent;
+                    tradesIntent = new Intent(AktienDetailsActivity.this, TradesActivity.class);
+                    startActivity(tradesIntent);
+
+                    finish();
+                    return true;
+
+                } else if (menuItem.getItemId() == R.id.menuLogout) {
+                    Intent tradesIntent;
+                    tradesIntent = new Intent(AktienDetailsActivity.this, TradesActivity.class);
+                    startActivity(tradesIntent);
+
+                    finish();
+                    return true;
+
+                }
+                return false;
+            }
+        });
 
         TextView tickerTextView = findViewById(R.id.detailsTickerText);
         TextView signalTextView = findViewById(R.id.detailsSignalText);
@@ -94,8 +160,8 @@ public class AktienDetailsActivity extends AppCompatActivity {
                                     Intent tradeErstellenIntent;
                                     tradeErstellenIntent = new Intent(AktienDetailsActivity.this, TradeErstellenActivity.class);
 
-                                    tradeErstellenIntent.putExtra("ticker",ticker);
-                                    tradeErstellenIntent.putExtra("score",score);
+                                    tradeErstellenIntent.putExtra("ticker", ticker);
+                                    tradeErstellenIntent.putExtra("score", score);
                                     startActivity(tradeErstellenIntent);
 
 
@@ -119,9 +185,6 @@ public class AktienDetailsActivity extends AppCompatActivity {
                         } else {
                             change20dTextView.setText("20-Tage-Änderung: " + change20dPct + " %");
                         }
-
-
-
 
 
                         Toast.makeText(AktienDetailsActivity.this, "Signal erfolgreich geladen", Toast.LENGTH_SHORT).show();

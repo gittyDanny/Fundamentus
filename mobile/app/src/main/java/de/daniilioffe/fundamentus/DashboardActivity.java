@@ -57,6 +57,12 @@ public class DashboardActivity extends AppCompatActivity {
 
                 }
 
+                if (menuItem.getItemId() == R.id.menuTrades){
+                    Intent tradesIntent = new Intent(DashboardActivity.this, TradesActivity.class);
+                    startActivity(tradesIntent);
+                    return true;
+                }
+
 
                 if (menuItem.getItemId() == R.id.menuStocks) {
                     Intent goToStocksIntent = new Intent(DashboardActivity.this, StocksActivity.class);

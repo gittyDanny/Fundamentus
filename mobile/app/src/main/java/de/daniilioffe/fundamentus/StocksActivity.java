@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -16,9 +17,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -39,6 +43,52 @@ public class StocksActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_stocks);
         LinearLayout aktieLayout = findViewById(R.id.stockContainer);
+
+        DrawerLayout drawerLayout = findViewById(R.id.drawerLayout);
+
+        Button buttonOpenMenu;
+        buttonOpenMenu = findViewById(R.id.buttonOpenMenu);
+
+        NavigationView navigationView;
+        navigationView = findViewById(R.id.navigationView);
+
+        buttonOpenMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+
+            }
+        });
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                if (menuItem.getItemId() == R.id.menuDashboard){
+                    Intent dashboardIntent;
+                    dashboardIntent = new Intent(StocksActivity.this, DashboardActivity.class);
+                    startActivity(dashboardIntent);
+                    finish();
+                    return true;
+                } else if (menuItem.getItemId() == R.id.menuTrades) {
+                    Intent tradesIntent;
+                    tradesIntent = new Intent(StocksActivity.this, TradesActivity.class);
+                    startActivity(tradesIntent);
+                    finish();
+                    return true;
+                } else if (menuItem.getItemId() == R.id.menuLogout) {
+                    Intent logoutIntent;
+                    logoutIntent = new Intent(StocksActivity.this,LoginActivity.class);
+                    FirebaseAuth.getInstance().signOut();
+                    startActivity(logoutIntent);
+                    Toast.makeText(StocksActivity.this, "logout erfolgreich", Toast.LENGTH_SHORT).show();
+
+                    finish();
+                    return true;
+
+                }
+                return false;
+            }
+        });
 
         EditText suchText;
         suchText = findViewById(R.id.suchTextEingabe);
@@ -83,7 +133,7 @@ public class StocksActivity extends AppCompatActivity {
                 nutzerTabelle.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> watchlistAbholen) {
-                        if (!watchlistAbholen.isSuccessful()) {
+                        if (watchlistAbholen.isSuccessful() == false) {
                             Toast.makeText(StocksActivity.this, "Watchliste konnte nicht geladen werden", Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -237,4 +287,5 @@ public class StocksActivity extends AppCompatActivity {
             }
         }
     }
+
 }
