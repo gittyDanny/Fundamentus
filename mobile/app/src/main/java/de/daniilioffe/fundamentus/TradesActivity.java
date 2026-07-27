@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -126,6 +127,8 @@ public class TradesActivity extends AppCompatActivity {
                                                    Double kaufGebühr = positionDatensatz.getDouble("kaufGebühr");
                                                    Double erwarteteVerkaufsGebühr = positionDatensatz.getDouble("erwarteteVerkaufsGebühr");
                                                    Double scoreBeimEinstieg = positionDatensatz.getDouble("scoreBeimEinstieg");
+                                                   String tradeID = positionDatensatz.getId();
+                                                   String tickerFürSchließen = ticker;
 
                                                    if (ticker == null) {
                                                        ticker = "";
@@ -158,6 +161,8 @@ public class TradesActivity extends AppCompatActivity {
                                                    View positionKachel;
                                                    positionKachel = tradeInflater.inflate(R.layout.item_trade, positionContainer, false);
 
+
+
                                                    TextView tickerText = positionKachel.findViewById(R.id.tradeItemTickerText);
                                                    TextView börseText = positionKachel.findViewById(R.id.tradeItemBrokerText);
                                                    TextView einstiegText = positionKachel.findViewById(R.id.tradeItemEinstiegText);
@@ -167,13 +172,48 @@ public class TradesActivity extends AppCompatActivity {
                                                    TextView auszahlungText = positionKachel.findViewById((R.id.tradeItemAuszahlungText));
                                                    TextView plText = positionKachel.findViewById(R.id.tradeItemPlText);
                                                    TextView scoreText = positionKachel.findViewById(R.id.tradeItemScoreText);
+                                                   Button tradeLöschenButton = positionKachel.findViewById(R.id.buttonTradeLöschen);
+                                                   Button tradeSchließenButton = positionKachel.findViewById(R.id.buttonTradeSchließen);
+
+
+
+
+                                                   DocumentReference positionDatensatzReference = positionDatensatz.getReference();
+                                                   tradeSchließenButton.setOnClickListener(new View.OnClickListener() {
+                                                       @Override
+                                                       public void onClick(View v) {
+                                                           Intent schließenIntent;
+                                                           schließenIntent = new Intent(TradesActivity.this,TradeSchließenActivity.class);
+                                                           schließenIntent.putExtra("tradeID",tradeID);
+                                                           schließenIntent.putExtra("ticker",tickerFürSchließen);
+                                                           startActivity(schließenIntent);
+                                                       }
+                                                   });
+                                                   tradeLöschenButton.setOnClickListener(new View.OnClickListener() {
+                                                       @Override
+                                                       public void onClick(View v) {
+                                                           positionDatensatzReference.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                               @Override
+                                                               public void onComplete(@NonNull Task<Void> tradeLöschen) {
+                                                                   if (tradeLöschen.isSuccessful() == false) {
+                                                                       Toast.makeText(TradesActivity.this, "Trade konnte nicht gelöscht werden", Toast.LENGTH_SHORT).show();
+                                                                       return;
+                                                                   }
+                                                                   positionContainer.removeView(positionKachel);
+
+                                                                   Toast.makeText(TradesActivity.this, "Trade gelöscht", Toast.LENGTH_SHORT).show();
+                                                                   positionStatusText.setText("Offene Trades : " + positionContainer.getChildCount());
+                                                               }
+                                                           });
+                                                       }
+                                                   });
 
                                                    double gesamterEinsatz = kaufpreis * anzahl + kaufGebühr;
                                                    tickerText.setText(ticker);
                                                    börseText.setText("Broker: " + börse);
-                                                   einstiegText.setText("Einstieg: " + String.format("%.2f", kaufpreis) + " €");
+                                                   einstiegText.setText("Einstieg: " + String.format("%.2f", kaufpreis) + " $");
                                                    anzahlText.setText("Anzahl: " + String.format("%.4f", anzahl));
-                                                   einsatzText.setText("Gesamteinsatz: " + String.format("%.2f", gesamterEinsatz) + " €");
+                                                   einsatzText.setText("Gesamteinsatz: " + String.format("%.2f", gesamterEinsatz) + " $");
                                                    if (scoreBeimEinstieg == -1.0) {
                                                        scoreText.setText("Score beim Einstieg: -");
 
@@ -211,9 +251,9 @@ public class TradesActivity extends AppCompatActivity {
                                                            double auszahlungNachGebühr = aktuellerBruttowert - verkaufsGebührFürBerechnung;
                                                            double nettoPL = auszahlungNachGebühr - gesamterEinsatzFürBerechnung;
                                                            double nettoPLProzent = nettoPL / gesamterEinsatzFürBerechnung * 100;
-                                                           kursText.setText("Letzter Fundamentus-Kurs: " + String.format("%.2f", letzterBotKurs) + " €");
-                                                           auszahlungText.setText("Auszahlung nach Gebühr: " + String.format("%.2f", auszahlungNachGebühr) + " €");
-                                                           plText.setText("Netto-P/L: " + String.format("%+.2f", nettoPL) + " € /" + String.format("%+.2f", nettoPLProzent) + " %");
+                                                           kursText.setText("Letzter Fundamentus-Kurs: " + String.format("%.2f", letzterBotKurs) + " $");
+                                                           auszahlungText.setText("Auszahlung nach Gebühr: " + String.format("%.2f", auszahlungNachGebühr) + " $");
+                                                           plText.setText("Netto-P/L: " + String.format("%+.2f", nettoPL) + " $ /" + String.format("%+.2f", nettoPLProzent) + " %");
 
 
                                                        }

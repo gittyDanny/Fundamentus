@@ -159,7 +159,7 @@ public class TradeErstellenActivity extends AppCompatActivity {
 
                 double gesamtePosition = kaufpreis * anzahl + kaufGebühr;
 
-                textKostenVorschau.setText("Gesamteinsatz: " + gesamtePosition + " €");
+                textKostenVorschau.setText("Gesamteinsatz: " + gesamtePosition + " $");
 
                 OffenerTrade neuerTrade;
 
