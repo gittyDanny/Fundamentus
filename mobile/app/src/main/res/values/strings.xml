@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Fundamentus Companion</string>
+
+    <string-array name="sector_filter_auswahl">
+        <item>Alle Sektoren</item>
+        <item>Technology</item>
+        <item>Communication Services</item>
+        <item>Consumer Cyclical</item>
+    </string-array>
+
+    <string-array name="watchlist_filter_auswahl">
+        <item>Alle Aktien</item>
+        <item>Nur Watchlist</item>
+    </string-array>
+
+    <string-array name="broker_auswahl">
+        <item>Bitpanda</item>
+        <item>Trade Republic</item>
+        <item>Scalable Capital</item>
+    </string-array>
+
+
+</resources>
