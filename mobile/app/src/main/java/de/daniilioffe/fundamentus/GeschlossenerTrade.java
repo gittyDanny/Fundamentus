@@ -1,6 +1,7 @@
 package de.daniilioffe.fundamentus;
 
 import java.util.Date;
+//Klasse für das Speichern geschlossener Trades
 
 public class GeschlossenerTrade {
     public String ticker;

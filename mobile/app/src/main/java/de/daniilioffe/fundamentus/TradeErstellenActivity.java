@@ -25,7 +25,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Date;
-
+//Hier wird ein Trade erstell, die Activity bekommt den Score und den Ticker übergeben
 public class TradeErstellenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {

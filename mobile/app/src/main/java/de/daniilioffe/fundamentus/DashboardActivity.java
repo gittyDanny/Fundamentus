@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 // 1. XML wird geladen, 2. UI Elemente werden gefunden 3. Listener werden registriert,
 // 4. Nutzer clickt 5. Listener Methode wird ausgeführt -> Activity
+//Startseite, wo später übersichten eingeplant sind, z.Z ein Dummy, über das man auf andere Activities gelangt
 public class DashboardActivity extends AppCompatActivity {
 
     @Override

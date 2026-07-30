@@ -21,7 +21,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Date;
-
+//Trade Schliessen(Verkaufen) - Trade wird als GeschlossenerTrade gespeichert für spätere Analyse.
 public class TradeSchließenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {

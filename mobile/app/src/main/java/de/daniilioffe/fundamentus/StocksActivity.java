@@ -34,7 +34,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
-
+//Übersicht an Aktien, die wir im Fundamentus analysieren
 public class StocksActivity extends AppCompatActivity {
 
     @Override

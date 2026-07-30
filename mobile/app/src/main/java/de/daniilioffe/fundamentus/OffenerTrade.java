@@ -1,7 +1,7 @@
 package de.daniilioffe.fundamentus;
 
 import java.util.Date;
-
+//Klasse für das Speichern laufender Trades
 public class OffenerTrade {
     public String ticker;
     public double scoreBeimEinstieg;

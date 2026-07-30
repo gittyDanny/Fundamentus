@@ -28,6 +28,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+//Hier ist eine Ansicht mit laufenden Trades(offenen Trades) man kan hierüber die Trades löschen oder
+// zum Schliessen Ansicht(verkaufen) weitertgeleitet werden
 public class TradesActivity extends AppCompatActivity {
 
 
@@ -162,7 +164,6 @@ public class TradesActivity extends AppCompatActivity {
                                                    positionKachel = tradeInflater.inflate(R.layout.item_trade, positionContainer, false);
 
 
-
                                                    TextView tickerText = positionKachel.findViewById(R.id.tradeItemTickerText);
                                                    TextView börseText = positionKachel.findViewById(R.id.tradeItemBrokerText);
                                                    TextView einstiegText = positionKachel.findViewById(R.id.tradeItemEinstiegText);
@@ -176,16 +177,14 @@ public class TradesActivity extends AppCompatActivity {
                                                    Button tradeSchließenButton = positionKachel.findViewById(R.id.buttonTradeSchließen);
 
 
-
-
                                                    DocumentReference positionDatensatzReference = positionDatensatz.getReference();
                                                    tradeSchließenButton.setOnClickListener(new View.OnClickListener() {
                                                        @Override
                                                        public void onClick(View v) {
                                                            Intent schließenIntent;
-                                                           schließenIntent = new Intent(TradesActivity.this,TradeSchließenActivity.class);
-                                                           schließenIntent.putExtra("tradeID",tradeID);
-                                                           schließenIntent.putExtra("ticker",tickerFürSchließen);
+                                                           schließenIntent = new Intent(TradesActivity.this, TradeSchließenActivity.class);
+                                                           schließenIntent.putExtra("tradeID", tradeID);
+                                                           schließenIntent.putExtra("ticker", tickerFürSchließen);
                                                            startActivity(schließenIntent);
                                                        }
                                                    });

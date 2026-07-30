@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-//Quasi die MainActivity, aber ich wollte alle Activities nach Funktion nennen
+//Quasi die MainActivity, aber ich wollte alle Activities nach Funktion nennen, ansonsten der Name sehr selbsterklärend
 
 public class LoginActivity extends AppCompatActivity {
 

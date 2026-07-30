@@ -21,7 +21,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-//Details Button wird angeclickt, Aktiendetails werden aufgerufen:
+//Details einer Aktie
+//Details Button im Stocks Activity wird angeclickt, Aktiendetails werden aufgerufen:
 //Signal,Score,Begründung für das Score, letzter Kurs, SMA20, 20 Tage Änderung
 //Über ticker aus Firestore geholt
 public class AktienDetailsActivity extends AppCompatActivity {
