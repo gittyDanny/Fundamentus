@@ -1,7 +1,11 @@
 from app.database import init_db
 from app.config import load_watchlist
 from app.storage.save_assets import save_assets
-from app.jobs.price_update_job import update_daily_prices_for_assets
+from app.jobs.price_update_job import (
+    has_sufficient_daily_history_for_assets,
+    update_daily_prices_for_assets,
+    update_intraday_prices_for_assets
+)
 from app.jobs.signal_update_job import update_signals_for_assets
 from app.firebase.bot_firebase_sync import sync_bot_data_to_firestore
 from app.reports.signal_reports import show_latest_signals
@@ -14,9 +18,8 @@ from app.jobs.fundamentals_update_job import (
 )
 
 
-def print_price_update_results(price_results):
-    # hier geben wir für jedes Asset aus, ob der Kursdaten-Import funktioniert hat
-    print("\nKursdaten-Update für Watchlist:")
+def print_price_update_results(title, price_results):
+    print(f"\n{title}:")
 
     for result in price_results:
         ticker = result.get("ticker")
@@ -35,7 +38,6 @@ def print_price_update_results(price_results):
 
 
 def print_fundamental_update_results(fundamental_results):
-    # hier geben wir aus, bei welchen Assets Fundamentaldaten geladen wurden
     print("\nFundamentaldaten-Update:")
 
     for result in fundamental_results:
@@ -66,7 +68,6 @@ def print_fundamental_update_results(fundamental_results):
 
 
 def print_signal_results(signal_result):
-    # hier geben wir die frisch berechneten Signale aus
     print("\nSignale aus Kursanalyse:")
 
     for signal in signal_result["signals"]:
@@ -88,21 +89,18 @@ def print_signal_results(signal_result):
         )
 
 
-def count_price_errors(price_results):
-    # hier zählen wir fehlgeschlagene Kursdaten-Updates
+def count_price_errors(*price_result_groups):
     error_count = 0
 
-    for result in price_results:
-        if result.get("status") != "ok":
-            error_count += 1
+    for price_results in price_result_groups:
+        for result in price_results:
+            if result.get("status") != "ok":
+                error_count += 1
 
     return error_count
 
 
 def print_firestore_sync_result(sync_result):
-    """
-    Gibt das Ergebnis der Firestore-Synchronisierung verständlich aus.
-    """
     status = sync_result.get("status")
     reason = sync_result.get("reason")
 
@@ -132,40 +130,44 @@ def print_firestore_sync_result(sync_result):
 def main():
     print("\nFundamentus Bot startet...")
 
-    # Datenbank und Bot-Run vorbereiten
     init_db()
     run_id = start_bot_run()
 
-    # Watchlist laden
     assets = load_watchlist()
 
-    # Fundamental-Update ist nur fällig, wenn das letzte Update
-    # mindestens zwölf Stunden zurückliegt.
+    # SEC- und Yahoo-Fundamentaldaten bleiben auf zwölf Stunden begrenzt.
     fundamentals_due = should_update_fundamentals(
         interval_hours=12
     )
 
-    # Die SEC-CIK-Auflösung wird nur für den Fundamental-Lauf benötigt.
     if fundamentals_due:
         assets = resolve_ciks_for_assets(assets)
 
-    # Assets speichern. Bereits bekannte CIKs bleiben erhalten,
-    # wenn bei einem technischen Lauf keine CIK mitgegeben wird.
     save_assets(assets)
-
     show_saved_assets()
 
-    # Kursdaten und technische Analyse laufen bei jedem Botstart.
-    # Durch den systemd-Timer geschieht das alle zehn Minuten.
-    price_results = update_daily_prices_for_assets(assets)
+    # Tageshistorie dient weiterhin als Grundlage für SMA20, SMA50,
+    # 5D-Momentum, 20D-Trend und Tagesvolatilität.
+    daily_history_missing = not has_sufficient_daily_history_for_assets(
+        assets
+    )
+    daily_prices_due = fundamentals_due or daily_history_missing
 
-    print_price_update_results(price_results)
+    daily_price_results = []
 
-    # Fundamentaldaten nur alle zwölf Stunden aktualisieren.
+    if daily_prices_due:
+        daily_price_results = update_daily_prices_for_assets(assets)
+        print_price_update_results(
+            "Tageskursdaten-Update",
+            daily_price_results
+        )
+    else:
+        print("\nTageskursdaten-Update:")
+        print("- Übersprungen: Tageshistorie ist vorhanden.")
+
     if fundamentals_due:
         fundamental_results = update_fundamentals_for_assets(assets)
         print_fundamental_update_results(fundamental_results)
-
     else:
         print("\nFundamentaldaten-Update:")
         print(
@@ -173,14 +175,25 @@ def main():
             "weniger als 12 Stunden zurück."
         )
 
-    # Die technische Analyse verwendet weiterhin die bereits
-    # in SQLite gespeicherten Fundamentaldaten.
+    # Echte Yahoo-5-Minuten-Kerzen werden bei jedem Botlauf geladen.
+    intraday_price_results = update_intraday_prices_for_assets(assets)
+
+    print_price_update_results(
+        "5-Minuten-Kursdaten-Update",
+        intraday_price_results
+    )
+
+    # Die Tageskennzahlen werden mit dem aktuellen Intraday-Kurs
+    # neu bewertet.
     signal_result = update_signals_for_assets(assets)
 
     print_signal_results(signal_result)
     show_latest_signals(limit=40)
 
-    price_errors = count_price_errors(price_results)
+    price_errors = count_price_errors(
+        daily_price_results,
+        intraday_price_results
+    )
 
     finish_bot_run(
         run_id=run_id,
@@ -190,8 +203,8 @@ def main():
         signals_saved=signal_result["saved_rows"]
     )
 
-    # Firestore-Synchronisierung bleibt unverändert.
-    # Collections, Dokument-IDs und Felder ändern sich nicht.
+    # Die vorhandene Firebase-Funktion bleibt unverändert.
+    # Sie schreibt weiterhin dieselben Collections und Felder.
     firestore_sync_result = sync_bot_data_to_firestore()
 
     print_firestore_sync_result(firestore_sync_result)

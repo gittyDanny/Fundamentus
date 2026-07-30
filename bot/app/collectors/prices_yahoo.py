@@ -1,74 +1,175 @@
-from datetime import datetime
+from datetime import datetime, timezone
+
 import requests
 
 
-def fetch_daily_prices_from_yahoo(ticker):
-    # hier holen wir Tageskurse von Yahoo als JSON-Daten
-    # ticker ist z.B. TSLA, NVDA oder AMD
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
+YAHOO_CHART_URL = (
+    "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
+)
 
-    params = {
-        "range": "1y",
-        "interval": "1d"
-    }
+YAHOO_HEADERS = {
+    "User-Agent": "Mozilla/5.0"
+}
 
-    headers = {
-        # hier geben wir einen normalen User-Agent mit,
-        # damit der Request weniger nach kaputtem Bot aussieht
-        "User-Agent": "Mozilla/5.0"
-    }
+
+def fetch_yahoo_chart(ticker, params):
+    url = YAHOO_CHART_URL.format(ticker=ticker)
 
     response = requests.get(
         url,
         params=params,
-        headers=headers,
+        headers=YAHOO_HEADERS,
         timeout=20
     )
 
     response.raise_for_status()
 
     data = response.json()
+    chart = data.get("chart", {})
+    error = chart.get("error")
+    results = chart.get("result")
 
-    # hier holen wir den eigentlichen Ergebnisblock aus der Yahoo-Antwort
-    result = data["chart"]["result"][0]
+    if error:
+        description = error.get(
+            "description",
+            "Unbekannter Yahoo-Fehler"
+        )
+        raise ValueError(description)
 
-    timestamps = result["timestamp"]
-    quote = result["indicators"]["quote"][0]
+    if not results:
+        return None
 
-    opens = quote["open"]
-    highs = quote["high"]
-    lows = quote["low"]
-    closes = quote["close"]
-    volumes = quote["volume"]
+    return results[0]
+
+
+def fetch_daily_prices_from_yahoo(ticker, range_value="1y"):
+    result = fetch_yahoo_chart(
+        ticker=ticker,
+        params={
+            "range": range_value,
+            "interval": "1d",
+            "includePrePost": "false"
+        }
+    )
+
+    if result is None:
+        return []
+
+    timestamps = result.get("timestamp", [])
+    quote = result.get("indicators", {}).get("quote", [{}])[0]
+
+    opens = quote.get("open", [])
+    highs = quote.get("high", [])
+    lows = quote.get("low", [])
+    closes = quote.get("close", [])
+    volumes = quote.get("volume", [])
 
     prices = []
 
-    # hier laufen wir durch alle Tageswerte gleichzeitig durch
-    for index in range(len(timestamps)):
-        date = datetime.fromtimestamp(timestamps[index]).strftime("%Y-%m-%d")
-
-        open_price = opens[index]
-        high_price = highs[index]
-        low_price = lows[index]
+    for index, timestamp in enumerate(timestamps):
         close_price = closes[index]
-        volume = volumes[index]
 
-        # hier überspringen wir leere Tage,
-        # weil APIs manchmal None-Werte liefern
         if close_price is None:
             continue
 
-        price = {
+        date = datetime.fromtimestamp(
+            timestamp,
+            tz=timezone.utc
+        ).strftime("%Y-%m-%d")
+
+        prices.append({
             "ticker": ticker,
             "date": date,
-            "open": open_price,
-            "high": high_price,
-            "low": low_price,
+            "open": opens[index],
+            "high": highs[index],
+            "low": lows[index],
             "close": close_price,
-            "volume": volume,
+            "volume": volumes[index],
             "source": "yahoo"
-        }
+        })
 
-        prices.append(price)
+    return prices
+
+
+def parse_utc_timestamp(timestamp_text):
+    parsed = datetime.fromisoformat(timestamp_text)
+
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    else:
+        parsed = parsed.astimezone(timezone.utc)
+
+    return int(parsed.timestamp())
+
+
+def fetch_intraday_prices_from_yahoo(
+    ticker,
+    latest_timestamp=None
+):
+    params = {
+        "interval": "5m",
+        "includePrePost": "false"
+    }
+
+    if latest_timestamp is None:
+        # Beim ersten Import werden fünf Handelstage geladen.
+        params["range"] = "5d"
+    else:
+        latest_unix_timestamp = parse_utc_timestamp(
+            latest_timestamp
+        )
+
+        # Die letzten zehn Minuten werden erneut geladen,
+        # damit eine laufende Kerze aktualisiert werden kann.
+        params["period1"] = max(
+            0,
+            latest_unix_timestamp - 10 * 60
+        )
+
+        params["period2"] = int(
+            datetime.now(timezone.utc).timestamp()
+        ) + 5 * 60
+
+    result = fetch_yahoo_chart(
+        ticker=ticker,
+        params=params
+    )
+
+    if result is None:
+        return []
+
+    timestamps = result.get("timestamp", [])
+    quote = result.get("indicators", {}).get("quote", [{}])[0]
+
+    opens = quote.get("open", [])
+    highs = quote.get("high", [])
+    lows = quote.get("low", [])
+    closes = quote.get("close", [])
+    volumes = quote.get("volume", [])
+
+    prices = []
+
+    for index, timestamp in enumerate(timestamps):
+        close_price = closes[index]
+
+        if close_price is None:
+            continue
+
+        timestamp_text = datetime.fromtimestamp(
+            timestamp,
+            tz=timezone.utc
+        ).isoformat(timespec="seconds")
+
+        prices.append({
+            "ticker": ticker,
+            "timestamp": timestamp_text,
+            "timeframe": "5m",
+            "open": opens[index],
+            "high": highs[index],
+            "low": lows[index],
+            "close": close_price,
+            "volume": volumes[index],
+            "source": "yahoo"
+        })
 
     return prices

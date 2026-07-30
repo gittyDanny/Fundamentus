@@ -1,9 +1,10 @@
 [Unit]
-Description=Run Fundamentus technical analysis every 10 minutes
+Description=Run Fundamentus technical analysis every 5 minutes
 
 [Timer]
-OnBootSec=2min
-OnUnitActiveSec=10min
+OnCalendar=*:0/5
+Persistent=true
+AccuracySec=10s
 Unit=fundamentus-bot.service
 
 [Install]

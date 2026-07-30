@@ -6,17 +6,13 @@ DB_PATH = Path("data/fundamentus.db")
 
 
 def get_connection():
-    # hier stellen wir sicher, dass der data-Ordner existiert,
-    # weil SQLite sonst keine Datenbankdatei anlegen kann
+    # Der data-Ordner wird bei Bedarf automatisch angelegt.
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    # hier öffnen wir die Verbindung zur lokalen SQLite-Datenbank
     return sqlite3.connect(DB_PATH)
 
 
 def init_db():
-    # hier legen wir alle Tabellen an, die Fundamentus aktuell braucht
-    # wenn Tabellen schon existieren, passiert einfach nichts Schlimmes
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -49,20 +45,16 @@ def init_db():
     """)
 
     try:
-        # hier ergänzen wir die CIK-Spalte für ältere Datenbanken,
-        # die schon vor dem SEC-Import erstellt wurden
         cursor.execute("ALTER TABLE assets ADD COLUMN cik TEXT;")
     except sqlite3.OperationalError:
-        # hier landen wir, wenn die Spalte schon existiert
-        # das ist okay, weil wir main.py mehrfach starten wollen
         pass
 
     try:
-        # hier ergänzen wir eine Aktiv-Spalte für ältere Datenbanken,
-        # damit entfernte Watchlist-Assets nicht weiter als aktiv gelten
-        cursor.execute("ALTER TABLE assets ADD COLUMN is_active INTEGER DEFAULT 1;")
+        cursor.execute(
+            "ALTER TABLE assets "
+            "ADD COLUMN is_active INTEGER DEFAULT 1;"
+        )
     except sqlite3.OperationalError:
-        # hier landen wir, wenn die Spalte schon existiert
         pass
 
     cursor.execute("""
@@ -79,6 +71,28 @@ def init_db():
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(ticker, date, source)
     );
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS price_intraday (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ticker TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        timeframe TEXT NOT NULL,
+        open REAL,
+        high REAL,
+        low REAL,
+        close REAL,
+        volume INTEGER,
+        source TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(ticker, timestamp, timeframe, source)
+    );
+    """)
+
+    cursor.execute("""
+    CREATE INDEX IF NOT EXISTS idx_price_intraday_ticker_timestamp
+    ON price_intraday(ticker, timestamp DESC);
     """)
 
     cursor.execute("""
