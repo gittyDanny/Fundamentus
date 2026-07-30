@@ -21,7 +21,9 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
+//Details Button wird angeclickt, Aktiendetails werden aufgerufen:
+//Signal,Score,Begründung für das Score, letzter Kurs, SMA20, 20 Tage Änderung
+//Über ticker aus Firestore geholt
 public class AktienDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,7 +101,7 @@ public class AktienDetailsActivity extends AppCompatActivity {
         TextView change20dTextView = findViewById(R.id.detailsChange20dText);
         Button tradeErstellenButton = findViewById(R.id.buttonPaperTradeErstellen);
 
-
+        // ticker aus StocksActivity
         Intent detailsIntent = getIntent();
         String ticker = detailsIntent.getStringExtra("ticker");
 
@@ -108,6 +110,7 @@ public class AktienDetailsActivity extends AppCompatActivity {
             finish();
             return;
         }
+
         FirebaseFirestore datenbankVerbindung;
         datenbankVerbindung = FirebaseFirestore.getInstance();
 

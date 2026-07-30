@@ -183,7 +183,7 @@ public class TradeErstellenActivity extends AppCompatActivity {
         FirebaseFirestore datenbankVerbindung;
 
         datenbankVerbindung = FirebaseFirestore.getInstance();
-
+        //Trade wird ins Datenbank gespeichert (.add())
         datenbankVerbindung.collection("users").document(userID).collection("open_trades").add(neuerTrade).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
             @Override
             public void onComplete(@NonNull Task<DocumentReference> tradeSpeichern) {

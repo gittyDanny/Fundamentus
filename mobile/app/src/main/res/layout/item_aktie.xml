@@ -39,9 +39,10 @@
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switchWatchlist"
+            android:layout_marginLeft="70dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Watchlist" />
+            android:text="Watchlist:   " />
 
     </LinearLayout>
 
