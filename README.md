@@ -1,12 +1,13 @@
 # Fundamentus Companion
 
 <p align="center">
-  <img src="app/src/main/res/drawable/fundamentus_logo.png"
+  <img src="mobile/app/src/main/res/drawable/fundamentus_logo.png"
        alt="Fundamentus Logo"
        width="180">
 </p>
 
-**Entwickler:** Daniil Ioffe
+**Entwickler:** Daniil Ioffe  
+
 **Kurs:** App-Entwicklung mit Android, SoSe 2026
 
 ## Beschreibung
