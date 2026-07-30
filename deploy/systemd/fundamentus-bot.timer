@@ -1,9 +1,9 @@
 [Unit]
-Description=Run Fundamentus Bot every 12 hours
+Description=Run Fundamentus technical analysis every 10 minutes
 
 [Timer]
 OnBootSec=2min
-OnUnitActiveSec=12h
+OnUnitActiveSec=10min
 Unit=fundamentus-bot.service
 
 [Install]

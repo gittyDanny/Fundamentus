@@ -26,13 +26,14 @@ def save_asset(asset):
     INSERT INTO assets
     (ticker, name, asset_type, region, currency, sector, cik, is_active)
     VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+
     ON CONFLICT(ticker) DO UPDATE SET
         name = excluded.name,
         asset_type = excluded.asset_type,
         region = excluded.region,
         currency = excluded.currency,
         sector = excluded.sector,
-        cik = excluded.cik,
+        cik = COALESCE(excluded.cik, assets.cik),
         is_active = 1
     """, (
         asset["ticker"],

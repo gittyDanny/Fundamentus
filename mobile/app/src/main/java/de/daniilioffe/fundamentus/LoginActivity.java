@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "Bitte Passwort eingeben.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                //checken ob das die Daten mit der Nutzetabelle übereinstimmen
+                //checken ob das die Daten mit der Nutzertabelle übereinstimmen
                 firebaseAuth.signInWithEmailAndPassword(email, password).addOnSuccessListener(//wenn klappt passiert:
                         new OnSuccessListener<AuthResult>() {
                             @Override

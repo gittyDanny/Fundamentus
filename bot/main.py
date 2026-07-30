@@ -8,29 +8,34 @@ from app.reports.signal_reports import show_latest_signals
 from app.collectors.sec_ticker_mapping import resolve_ciks_for_assets
 from app.reports.console_reports import show_saved_assets
 from app.storage.bot_runs import start_bot_run, finish_bot_run
-from app.jobs.fundamentals_update_job import update_fundamentals_for_assets
+from app.jobs.fundamentals_update_job import (
+    should_update_fundamentals,
+    update_fundamentals_for_assets
+)
 
 
 def print_price_update_results(price_results):
     # hier geben wir für jedes Asset aus, ob der Kursdaten-Import funktioniert hat
-    # dadurch sehen wir direkt, welcher Ticker Probleme macht und welcher sauber läuft
     print("\nKursdaten-Update für Watchlist:")
 
     for result in price_results:
         ticker = result.get("ticker")
         status = result.get("status")
         loaded_rows = result.get("loaded_rows", 0)
-        new_rows = result.get("new_rows", 0)
+        changed_rows = result.get("new_rows", 0)
 
         if status == "ok":
-            print(f"- {ticker}: {loaded_rows} Kurszeilen geladen, {new_rows} neue Zeilen gespeichert")
+            print(
+                f"- {ticker}: {loaded_rows} Kurszeilen geladen, "
+                f"{changed_rows} Zeilen gespeichert/aktualisiert"
+            )
         else:
             error = result.get("error", "Unbekannter Fehler")
             print(f"- {ticker}: Fehler beim Kursdaten-Update: {error}")
 
+
 def print_fundamental_update_results(fundamental_results):
     # hier geben wir aus, bei welchen Assets Fundamentaldaten geladen wurden
-    # dadurch sehen wir direkt, welche Quelle SEC oder Yahoo genutzt wurde
     print("\nFundamentaldaten-Update:")
 
     for result in fundamental_results:
@@ -44,15 +49,24 @@ def print_fundamental_update_results(fundamental_results):
         source_text = source if source else "none"
 
         if status == "ok":
-            print(f"- {ticker}: {loaded_rows} Fundamentaldaten verarbeitet, {saved_rows} gespeichert | Quelle: {source_text}")
+            print(
+                f"- {ticker}: {loaded_rows} Fundamentaldaten verarbeitet, "
+                f"{saved_rows} gespeichert | Quelle: {source_text}"
+            )
         elif status == "skipped":
-            print(f"- {ticker}: übersprungen - {reason} | Quelle: {source_text}")
+            print(
+                f"- {ticker}: übersprungen - {reason} | "
+                f"Quelle: {source_text}"
+            )
         else:
-            print(f"- {ticker}: Fehler - {reason} | Quelle: {source_text}")
+            print(
+                f"- {ticker}: Fehler - {reason} | "
+                f"Quelle: {source_text}"
+            )
+
 
 def print_signal_results(signal_result):
-    # hier geben wir die frisch berechneten Signale aus,
-    # damit wir direkt im Terminal sehen, was der Bot analysiert hat
+    # hier geben wir die frisch berechneten Signale aus
     print("\nSignale aus Kursanalyse:")
 
     for signal in signal_result["signals"]:
@@ -73,8 +87,9 @@ def print_signal_results(signal_result):
             f"{reason}"
         )
 
+
 def count_price_errors(price_results):
-    # hier zählen wir, bei wie vielen Assets das Kursdaten-Update fehlgeschlagen ist
+    # hier zählen wir fehlgeschlagene Kursdaten-Updates
     error_count = 0
 
     for result in price_results:
@@ -113,68 +128,60 @@ def print_firestore_sync_result(sync_result):
         print(f"- Fehler: {reason}")
         print(f"- Details: {error}")
 
+
 def main():
     print("\nFundamentus Bot startet...")
 
-    # Schritt 1: Datenbank vorbereiten
-    # hier werden alle Tabellen angelegt, falls sie noch nicht existieren
+    # Datenbank und Bot-Run vorbereiten
     init_db()
-
-    # Schritt 1.1: Bot-Run in der Datenbank starten
-    # das darf erst nach init_db() passieren, weil sonst die Tabelle fehlen kann
     run_id = start_bot_run()
 
-    # Schritt 2: Watchlist laden
-    # die Watchlist ist unsere zentrale Quelle dafür, welche Assets der Bot beobachten soll
+    # Watchlist laden
     assets = load_watchlist()
 
-    # Schritt 2.1: CIKs für US-Aktien automatisch ergänzen
-    # dadurch müssen wir die SEC-Nummern nicht mehr manuell in der Watchlist pflegen
-    assets = resolve_ciks_for_assets(assets)
+    # Fundamental-Update ist nur fällig, wenn das letzte Update
+    # mindestens zwölf Stunden zurückliegt.
+    fundamentals_due = should_update_fundamentals(
+        interval_hours=12
+    )
 
-    # Schritt 3: Watchlist in der Datenbank speichern
-    # dadurch kennt die Datenbank alle Ticker, Namen, Regionen und Sektoren aus der YAML-Datei
+    # Die SEC-CIK-Auflösung wird nur für den Fundamental-Lauf benötigt.
+    if fundamentals_due:
+        assets = resolve_ciks_for_assets(assets)
+
+    # Assets speichern. Bereits bekannte CIKs bleiben erhalten,
+    # wenn bei einem technischen Lauf keine CIK mitgegeben wird.
     save_assets(assets)
 
-    # Schritt 4: gespeicherte Assets anzeigen
-    # hier prüfen wir kurz, ob die Assets sauber in der Datenbank stehen
     show_saved_assets()
 
-    # Schritt 5: Kursdaten für alle Assets aktualisieren
-    # vorher hatten wir nur TSLA, jetzt läuft der Bot durch die komplette Watchlist
+    # Kursdaten und technische Analyse laufen bei jedem Botstart.
+    # Durch den systemd-Timer geschieht das alle zehn Minuten.
     price_results = update_daily_prices_for_assets(assets)
 
-    # Schritt 6: Ergebnis vom Kursdaten-Update sauber ausgeben
-    # so sehen wir direkt, wie viele Zeilen geladen und neu gespeichert wurden
     print_price_update_results(price_results)
 
-    # Schritt 7: letzte Kurse für alle Assets anzeigen
-    # damit haben wir ein sichtbares erstes Ergebnis im Terminal
-    # show_latest_prices_for_assets(assets)
+    # Fundamentaldaten nur alle zwölf Stunden aktualisieren.
+    if fundamentals_due:
+        fundamental_results = update_fundamentals_for_assets(assets)
+        print_fundamental_update_results(fundamental_results)
 
-    # Schritt 8: Fundamentaldaten für Assets mit CIK aktualisieren
-    # diese Daten braucht der kombinierte Score aus Technik und Unternehmensqualität
-    fundamental_results = update_fundamentals_for_assets(assets)
+    else:
+        print("\nFundamentaldaten-Update:")
+        print(
+            "- Übersprungen: Das letzte Update liegt "
+            "weniger als 12 Stunden zurück."
+        )
 
-    # Schritt 9: Ergebnis vom Fundamentaldaten-Update anzeigen
-    # Assets ohne CIK werden dabei bewusst übersprungen
-    print_fundamental_update_results(fundamental_results)
-
-    # Schritt 10: Signale für alle Assets berechnen
-    # der Bot nutzt dafür Kursdaten und, falls vorhanden, Fundamentaldaten
+    # Die technische Analyse verwendet weiterhin die bereits
+    # in SQLite gespeicherten Fundamentaldaten.
     signal_result = update_signals_for_assets(assets)
 
-    # Schritt 11: Signale im Terminal anzeigen
     print_signal_results(signal_result)
-
-    # Schritt 10: gespeicherte Signale nochmal aus der Datenbank anzeigen
-    # dadurch prüfen wir, ob die Analyse wirklich persistiert wurde
     show_latest_signals(limit=40)
 
     price_errors = count_price_errors(price_results)
 
-    # Schritt 11: Bot-Run als erfolgreich abschließen
-    # dadurch sieht man später in der Webapp den letzten erfolgreichen Lauf
     finish_bot_run(
         run_id=run_id,
         status="success",
@@ -183,10 +190,8 @@ def main():
         signals_saved=signal_result["saved_rows"]
     )
 
-
-    # Schritt 12: aktuelle Botdaten nach Firestore übertragen
-    # der Botlauf wird zuerst abgeschlossen, damit der neue Erfolgsstatus
-    # ebenfalls nach Firestore geschrieben werden kann
+    # Firestore-Synchronisierung bleibt unverändert.
+    # Collections, Dokument-IDs und Felder ändern sich nicht.
     firestore_sync_result = sync_bot_data_to_firestore()
 
     print_firestore_sync_result(firestore_sync_result)

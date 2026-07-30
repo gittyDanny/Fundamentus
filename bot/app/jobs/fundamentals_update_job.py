@@ -1,10 +1,51 @@
+from datetime import datetime, timedelta, timezone
+
 from app.collectors.fundamentals_sec import fetch_company_facts_from_sec
 from app.collectors.fundamentals_yahoo import fetch_yahoo_fundamentals
+from app.database import get_connection
 from app.normalizers.fundamentals_sec import normalize_sec_company_facts
 from app.storage.save_fundamentals import (
     delete_fundamentals_for_ticker,
     save_fundamentals
 )
+
+
+def should_update_fundamentals(interval_hours=12):
+    """
+    Prüft, ob das nächste Fundamental-Update fällig ist.
+
+    Dafür wird der Zeitstempel des zuletzt gespeicherten
+    Fundamentalwerts aus SQLite verwendet.
+    SQLite CURRENT_TIMESTAMP verwendet UTC.
+    """
+    conn = get_connection()
+
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        SELECT MAX(created_at)
+        FROM fundamentals;
+        """)
+
+        row = cursor.fetchone()
+
+    finally:
+        conn.close()
+
+    if row is None or row[0] is None:
+        return True
+
+    last_update = datetime.fromisoformat(row[0])
+
+    if last_update.tzinfo is None:
+        last_update = last_update.replace(tzinfo=timezone.utc)
+    else:
+        last_update = last_update.astimezone(timezone.utc)
+
+    next_update = last_update + timedelta(hours=interval_hours)
+
+    return datetime.now(timezone.utc) >= next_update
 
 
 def should_use_yahoo_fallback(asset):
